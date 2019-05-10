@@ -1,3 +1,5 @@
+import "./clobber.css"
+
 (() => {
 	function Game(canvas) {
 		const ctx = canvas.getContext("2d");

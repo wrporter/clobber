@@ -1,5 +1,19 @@
 # Clobber Bots
 
+## Getting Started
+
+Serve and develop the app:
+
+```bash
+npm start
+```
+
+Build static assets to be output to the `dist` directory:
+
+```bash
+npm run build
+```
+
 ## Description:
 
 In this assignment, you will develop an agent (or bot) for a video game. More than 1 copy of your bot may be placed in the game. So, for maximum performance you will need to make your bots cooperate with each other - at a minimum they shouldn't intentionally shoot each other. I plan on running tournaments with teams of size 1, 2, and 4. I'll run the tournaments as 1 team vs 1 team round robbin, and free-for-all (everybody all at once). There are two goals in the game:
