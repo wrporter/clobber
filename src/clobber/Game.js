@@ -1,6 +1,5 @@
 import Bot, { BOT_RADIUS } from "./Bot";
 import Point from './Point';
-import * as images from './images/images';
 
 class Game {
 	constructor(canvas) {
@@ -18,7 +17,7 @@ class Game {
 
 	start() {
 		for (let i = 0; i < 10; i++) {
-			this.bots.push(new Bot("wesp", this.ctx, new Point(i * 25, i * 25), images.frog));
+			this.bots.push(new Bot("wesp", this.ctx, new Point(i * 25, i * 25)));
 		}
 		setInterval(() => this.update(), 10);
 	}

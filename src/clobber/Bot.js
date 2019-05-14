@@ -1,15 +1,21 @@
 import ID from './ID';
+import * as images from './images';
 
 const BOT_RADIUS = 8;
+const IMAGES = [images.bird, images.duck, images.fish, images.frog, images.owl];
+
+function getRandomImage() {
+	return IMAGES[Math.floor(Math.random() * IMAGES.length)];
+}
 
 class Bot {
-	constructor(name, ctx, point, imageData) {
+	constructor(name, ctx, point) {
 		this.id = ID();
 		this.name = name;
 		this.ctx = ctx;
 		this.point = point;
 		this.image = new Image();
-		this.image.src = imageData;
+		this.image.src = getRandomImage();
 	}
 
 	getId() {
