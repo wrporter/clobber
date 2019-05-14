@@ -28,14 +28,14 @@ class Bot {
 		if (x < 0) {
 			x = 0;
 		}
-		if (x >= this.ctx.canvas.width) {
-			x = this.ctx.canvas.width;
+		if (x >= this.ctx.canvas.width - 2 * BOT_RADIUS) {
+			x = this.ctx.canvas.width - 2 * BOT_RADIUS;
 		}
 		if (y < 0) {
 			y = 0;
 		}
-		if (y >= this.ctx.canvas.height) {
-			y = this.ctx.canvas.height;
+		if (y >= this.ctx.canvas.height - 2 * BOT_RADIUS) {
+			y = this.ctx.canvas.height - 2 * BOT_RADIUS;
 		}
 
 		this.point.x = x;

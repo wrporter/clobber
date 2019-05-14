@@ -1,6 +1,14 @@
 import Bot, { BOT_RADIUS } from "./Bot";
 import Point from './Point';
 
+const MIN_START_DISTANCE = 8 * BOT_RADIUS;
+
+function getRandomInt(min, max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 class Game {
 	constructor(canvas) {
 		this.canvas = canvas;
@@ -16,10 +24,28 @@ class Game {
 	}
 
 	start() {
-		for (let i = 0; i < 10; i++) {
-			this.bots.push(new Bot("wesp", this.ctx, new Point(i * 25, i * 25)));
+		for (let i = 0; i < 20; i++) {
+			this.addBotToGame(new Bot("wesp", this.ctx));
 		}
 		setInterval(() => this.update(), 10);
+	}
+
+	getMinDistanceToBot(bot) {
+		return this.bots.reduce((min, otherBot) => Math.min(min, bot.point.distance(otherBot)), Number.MAX_VALUE);
+	}
+
+	addBotToGame(bot) {
+		let numTries = 0;
+		let minDistance = 0;
+		do {
+			numTries++;
+			if (numTries > 1000) {
+				throw new Error("Failed to find a spot to place the bot.");
+			}
+			bot.point = new Point(getRandomInt(0, this.canvas.width), getRandomInt(0, this.canvas.height));
+			minDistance = this.getMinDistanceToBot(bot);
+		} while (minDistance < MIN_START_DISTANCE);
+		this.bots.push(bot);
 	}
 
 	update() {
