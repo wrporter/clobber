@@ -32,10 +32,11 @@ npm run build
 - If bots attempt to move outside the playing field, their position will be auto-adjusted to stay within the boundaries of the game. Bots that move in this manner, essentially lose a turn.
 - If bots collide with each other they die.
 - If bots get hit by a bullet they die.
-- Bots may only shoot on a minimum of every 5 turn cycles. For example, if a bot chooses to shoot on turn 3, they cannot shoot again until turn 8. Bots that choose to shoot on a turn they are not permitted will essentially lose a turn.
+- Bots may only shoot at a maximum rate of every 20 turn cycles. For example, if a bot chooses to shoot on turn 3, they cannot shoot again until turn 23. Bots that choose to shoot on a turn they are not permitted will essentially lose a turn.
+- Bots cannot be killed by their own bullets.
 - Bots take up the space of a 16x16 pixel square, even if they do not render that large. Bots should pay attention to the potential areas they may collide.
 - Bullets take up a space of a 5 pixel circle.
-
+- If bots throw any errors during processing, they will be disqualified and deleted from the match.
 ### Teams
 
 Bots may form teams. Bots that are programmed to recognize their teammates and work together will have a significant advantage.
