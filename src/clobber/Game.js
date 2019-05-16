@@ -1,16 +1,10 @@
-import RandomBot, { BOT_RADIUS } from "./RandomBot";
+import RandomBot from "./bots/RandomBot";
 import Point from './Point';
-import State from './State';
+import State, { BotState, BulletState, WorldState } from './State';
 import BotManager from './BotManager';
 import { Action, Direction } from './BotAction';
 import Bullet from './Bullet';
-
-const MIN_START_DISTANCE = 8 * BOT_RADIUS;
-const BOT_STEP_DISTANCE = 2;
-const BULLET_STEP_DISTANCE = 4;
-const SHOOT_FREQUENCY = 20;
-
-const BULLET_RADIUS = 2;
+import { generateId } from './ID';
 
 function getRandomInt(min, max) {
 	min = Math.ceil(min);
@@ -20,9 +14,11 @@ function getRandomInt(min, max) {
 
 class Game {
 	constructor(canvas) {
+		this.world = new WorldState();
+
 		this.canvas = canvas;
-		this.canvas.width = 400;
-		this.canvas.height = 400;
+		this.canvas.width = this.world.width;
+		this.canvas.height = this.world.height;
 		this.ctx = canvas.getContext("2d");
 
 		this.botManagers = [];
@@ -36,7 +32,7 @@ class Game {
 
 	start() {
 		for (let i = 0; i < 10; i++) {
-			this.addBotToGame(new RandomBot("wesp", this.ctx));
+			this.addBotToGame(new RandomBot(generateId(), "wesp", this.world.clone()));
 		}
 		this.gameLoop();
 	}
@@ -56,7 +52,7 @@ class Game {
 			}
 			point = new Point(getRandomInt(0, this.canvas.width), getRandomInt(0, this.canvas.height));
 			minDistance = this.getMinDistanceToBot(point);
-		} while (minDistance < MIN_START_DISTANCE);
+		} while (minDistance < this.world.minStartDistance);
 		const botManager = new BotManager(bot, point);
 		this.botManagers.push(botManager);
 	}
@@ -82,47 +78,76 @@ class Game {
 	}
 
 	collectBotActions() {
-		// TODO: Add proper state. Bots should only know about the locations and identities of other bots and bullets. Bots should not be able to modify any of the world state, so we should pass in a clone of the data - is that too expensive?
-		const state = new State(this.botManagers);
-		this.botManagers.forEach(botManager => {
+		this.botManagers.forEach((botManager, index, botManagers) => {
+			const state = this.generateState(botManager);
 			try {
 				botManager.currentAction = botManager.bot.takeTurn(state);
 			} catch (err) {
 				console.error(`Bot ${botManager} returned error when taking a turn.\n${err}`);
-				// TODO: Delete bot
+				// TODO: Fix all the places I'm removing items in a forEach. This won't work for consecutive items that need to be removed. It will work if we use a regular loop and start from the end of the array and go backwards.
+				botManagers.splice(index, 1);
 			}
 		});
 	}
 
+	generateState(botManager) {
+		const myBot = new BotState(
+			this.cloneString(botManager.bot.getId()),
+			this.cloneString(botManager.bot.team),
+			botManager.point.clone());
+
+		const bots = this.botManagers
+			.filter(bm => bm.bot.getId() !== botManager.bot.getId())
+			.map(bm => new BotState(
+				this.cloneString(bm.bot.getId()),
+				this.cloneString(bm.bot.team),
+				bm.point.clone()));
+
+		const myBullets = this.bullets
+			.filter(bullet => bullet.ownerId === botManager.bot.getId())
+			.map(bullet => new BulletState(bullet.point.clone(), this.cloneString(bullet.direction)));
+
+		const bullets = this.bullets
+			.filter(bullet => bullet.ownerId !== botManager.bot.getId())
+			.map(bullet => new BulletState(bullet.point.clone(), this.cloneString(bullet.direction)));
+
+		return new State(myBot, bots, myBullets, bullets);
+	}
+
+	cloneString(str) {
+		return (' ' + str).slice(1);
+	}
+
 	performBotActions() {
 		this.botManagers.forEach(botManager => {
-			if (botManager.shotClock + SHOOT_FREQUENCY > 0) {
+			if (botManager.shotClock + this.world.shootFrequency > 0) {
 				botManager.shotClock--;
 			}
 			const action = botManager.currentAction.action;
 			const direction = botManager.currentAction.direction;
 
 			if (action === Action.Move) {
-				const point = this.getUpdatedPoint(direction, botManager.point, BOT_STEP_DISTANCE);
-				if (point.x < BOT_RADIUS) {
-					point.x = BOT_RADIUS;
+				const point = this.getUpdatedPoint(direction, botManager.point, this.world.botStepDistance);
+				if (point.x < this.world.botRadius) {
+					point.x = this.world.botRadius;
 				}
-				if (point.y < BOT_RADIUS) {
-					point.y = BOT_RADIUS;
+				if (point.y < this.world.botRadius) {
+					point.y = this.world.botRadius;
 				}
-				if (point.x >= this.ctx.canvas.width - BOT_RADIUS) {
-					point.x = this.ctx.canvas.width - BOT_RADIUS;
+				if (point.x >= this.ctx.canvas.width - this.world.botRadius) {
+					point.x = this.ctx.canvas.width - this.world.botRadius;
 				}
-				if (point.y >= this.ctx.canvas.height - BOT_RADIUS) {
-					point.y = this.ctx.canvas.height - BOT_RADIUS;
+				if (point.y >= this.ctx.canvas.height - this.world.botRadius) {
+					point.y = this.ctx.canvas.height - this.world.botRadius;
 				}
 				botManager.point = point;
-			} else if (action === Action.Shoot && botManager.shotClock + SHOOT_FREQUENCY === 0) {
+			} else if (action === Action.Shoot && botManager.shotClock + this.world.shootFrequency === 0) {
 				botManager.shotClock = 0;
 				const bullet = new Bullet(
 					botManager.bot.getId(),
-					this.getUpdatedPoint(direction, botManager.point, BOT_RADIUS),
-					direction
+					this.getUpdatedPoint(direction, botManager.point, this.world.botRadius),
+					direction,
+					this.world.clone()
 				);
 				this.bullets.push(bullet);
 			}
@@ -131,11 +156,11 @@ class Game {
 
 	updateBulletPositions() {
 		this.bullets.forEach((bullet, index, bullets) => {
-			bullet.point = this.getUpdatedPoint(bullet.direction, bullet.point, BULLET_STEP_DISTANCE);
-			if (bullet.point.x <= -BULLET_RADIUS
-				|| bullet.point.y <= -BULLET_RADIUS
-				|| bullet.point.x >= this.ctx.canvas.width + BULLET_RADIUS
-				|| bullet.point.y >= this.ctx.canvas.height + BULLET_RADIUS) {
+			bullet.point = this.getUpdatedPoint(bullet.direction, bullet.point, this.world.bulletStepDistance);
+			if (bullet.point.x <= -this.world.bulletRadius
+				|| bullet.point.y <= -this.world.bulletRadius
+				|| bullet.point.x >= this.ctx.canvas.width + this.world.bulletRadius
+				|| bullet.point.y >= this.ctx.canvas.height + this.world.bulletRadius) {
 				bullets.splice(index, 1);
 			}
 		});
@@ -178,8 +203,8 @@ class Game {
 
 	renderFPS() {
 		this.ctx.fillStyle = "#FF00FF";
-		this.ctx.font = "normal 16pt Arial";
-		this.ctx.fillText(Math.round(this.fps) + " fps", 10, 26);
+		this.ctx.font = "normal 12pt Arial";
+		this.ctx.fillText(Math.round(this.fps) + " fps", 4, 18);
 
 		this.ctx.fillStyle = "#000000";
 	}
@@ -191,7 +216,7 @@ class Game {
 
 		this.bullets.forEach((bullet, bulletIndex, bullets) => {
 			this.botManagers.forEach((botManager, botIndex, botManagers) => {
-				if (botManager.bot.getId() !== bullet.owner
+				if (botManager.bot.getId() !== bullet.ownerId
 					&& this.botAndBulletCollide(bullet.point, botManager.point)) {
 					bullets.splice(bulletIndex, 1);
 					botManagers.splice(botIndex, 1);
@@ -204,27 +229,27 @@ class Game {
 		const distX = Math.abs(bulletPoint.x - botPoint.x);
 		const distY = Math.abs(bulletPoint.y - botPoint.y);
 
-		if (distX > (BOT_RADIUS + BULLET_RADIUS)) {
+		if (distX > (this.world.botRadius + this.world.bulletRadius)) {
 			return false;
 		}
-		if (distY > (BOT_RADIUS + BULLET_RADIUS)) {
+		if (distY > (this.world.botRadius + this.world.bulletRadius)) {
 			return false;
 		}
 
-		if (distX <= (BOT_RADIUS)) {
+		if (distX <= (this.world.botRadius)) {
 			return true;
 		}
-		if (distY <= (BOT_RADIUS)) {
+		if (distY <= (this.world.botRadius)) {
 			return true;
 		}
 
-		const dx = distX - BOT_RADIUS;
-		const dy = distY - BOT_RADIUS;
-		return (dx * dx + dy * dy <= (BULLET_RADIUS * BULLET_RADIUS));
+		const dx = distX - this.world.botRadius;
+		const dy = distY - this.world.botRadius;
+		return (dx * dx + dy * dy <= (this.world.bulletRadius * this.world.bulletRadius));
 	}
 
 	botsCollide(bot1, bot2) {
-		const width = 2 * BOT_RADIUS;
+		const width = 2 * this.world.botRadius;
 		return bot1 !== bot2
 			&& bot1.point.x < bot2.point.x + width
 			&& bot1.point.x + width > bot2.point.x
