@@ -82,6 +82,7 @@ class Game {
 	}
 
 	collectBotActions() {
+		// TODO: Add proper state. Bots should only know about the locations and identities of other bots and bullets. Bots should not be able to modify any of the world state, so we should pass in a clone of the data - is that too expensive?
 		const state = new State(this.botManagers);
 		this.botManagers.forEach(botManager => {
 			try {
