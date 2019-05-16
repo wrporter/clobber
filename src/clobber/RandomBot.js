@@ -72,6 +72,8 @@ class RandomBot {
 	}
 
 	render(context, point) {
+		// TODO: Don't allow bots to draw outside their allotted 16x16 space.
+
 		// context.fillStyle = "#ffff00";
 		// context.fillRect(point.x - BOT_RADIUS, point.y - BOT_RADIUS, 2 * BOT_RADIUS, 2 * BOT_RADIUS);
 
