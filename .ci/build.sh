@@ -6,4 +6,5 @@ source .ci/config.sh
 docker build \
 	--file .ci/Dockerfile \
 	--tag "${TARGET_IMAGE}:${VERSION}" \
-	docs
+	--tag "${TARGET_IMAGE}:latest" \
+	.

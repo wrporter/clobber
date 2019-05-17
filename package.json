@@ -4,6 +4,7 @@
 	"description": "Clobber Bots AI game",
 	"scripts": {
 		"build": "webpack --mode=production",
+		"ci": "npm run build",
 		"start": "webpack-dev-server --mode development"
 	},
 	"repository": {

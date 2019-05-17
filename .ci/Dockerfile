@@ -18,10 +18,10 @@ RUN npm run ci
 ###############################################################################
 # Build Server
 ###############################################################################
-FROM nginx:1.15-alpine AS server
+FROM abiosoft/caddy AS server
 LABEL maintainer="wesleyrporter@gmail.com"
 
 RUN mkdir -p /var/log/clobber
 
-COPY .ci/nginx.conf /etc/nginx/nginx.conf
-COPY --from=static /src/dist /var/www
+COPY .ci/Caddyfile /etc/Caddyfile
+COPY --from=static /src/dist /srv
