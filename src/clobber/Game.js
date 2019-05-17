@@ -159,6 +159,7 @@ class Game {
 				botManager.shotClock = 0;
 				const bullet = new Bullet(
 					botManager,
+					// TODO: Fix bullet starting position. Should start from the edge of the bot. It doesn't render that way because the bullet positions are updated once before getting rendered.
 					this.getUpdatedPoint(direction, botManager.point, this.world.botRadius),
 					direction,
 					this.world.clone()
@@ -257,6 +258,7 @@ class Game {
 				return bm2.score - bm1.score;
 			}
 		).forEach(bm => {
+			// TODO: Bots that are larger than 16x16 based on world config do not render well here. Need to account for bot size here.
 			let colX = x + this.world.botRadius;
 			bm.bot.render(this.ctx, new Point(colX, y));
 

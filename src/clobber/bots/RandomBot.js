@@ -75,7 +75,7 @@ class RandomBot {
 		// context.fillStyle = "#ffff00";
 		// context.fillRect(point.x - BOT_RADIUS, point.y - BOT_RADIUS, 2 * BOT_RADIUS, 2 * BOT_RADIUS);
 
-		context.drawImage(this.image, point.x - this.world.botRadius, point.y - this.world.botRadius);
+		context.drawImage(this.image, point.x - this.world.botRadius, point.y - this.world.botRadius, this.world.botRadius * 2, this.world.botRadius * 2);
 
 		// context.fillStyle = "#FF00FF";
 		// context.font = "normal 8pt Arial";
