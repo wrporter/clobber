@@ -48,6 +48,9 @@ export class WorldState {
 		this.shootFrequency = 20;
 
 		this.minStartDistance = 8 * this.botRadius;
+
+		this.killPoints = 10;
+		this.survivePoints = 40;
 	}
 
 	clone() {

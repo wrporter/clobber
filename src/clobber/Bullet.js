@@ -1,6 +1,6 @@
 class Bullet {
-	constructor(ownerId, point, direction, world) {
-		this.ownerId = ownerId;
+	constructor(owner, point, direction, world) {
+		this.owner = owner;
 		this.point = point;
 		this.direction = direction;
 		this.world = world;

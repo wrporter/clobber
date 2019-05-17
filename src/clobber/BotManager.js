@@ -6,6 +6,7 @@ class BotManager {
 		this.dead = false;
 		this.currentAction = null;
 		this.shotClock = 0;
+		this.score = 0;
 	}
 
 	render(context) {

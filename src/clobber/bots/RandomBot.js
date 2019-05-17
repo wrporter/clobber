@@ -24,7 +24,6 @@ class RandomBot {
 	}
 
 	takeTurn(state) {
-		throw new Error('blah');
 		let action = Action.None;
 		let direction = Direction.Up;
 
