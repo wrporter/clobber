@@ -5,6 +5,7 @@ import BotManager from './BotManager';
 import { Action, Direction } from './BotAction';
 import Bullet from './Bullet';
 import { generateId } from './ID';
+import { Mushroom } from './bots/Mushroom';
 
 function getRandomInt(min, max) {
 	min = Math.ceil(min);
@@ -34,6 +35,9 @@ class Game {
 	start() {
 		for (let i = 0; i < 10; i++) {
 			this.addBotToGame(new RandomBot(generateId(), generateId(), this.world.clone()));
+		}
+		for (let i = 0; i < 3; i++) {
+			this.addBotToGame(new Mushroom(generateId(), "mushroom", this.world.clone()));
 		}
 
 		// TODO: This is done to allow images to load. Fix this?
@@ -95,7 +99,7 @@ class Game {
 			try {
 				botManager.currentAction = botManager.bot.takeTurn(state);
 			} catch (err) {
-				console.error(`Bot ${botManager} returned error when taking a turn.\n${err}`);
+				console.error(`Bot ${botManager} returned error when taking a turn.`, err);
 				// TODO: Fix all the places I'm removing items in a forEach. This won't work for consecutive items that need to be removed. It will work if we use a regular loop and start from the end of the array and go backwards.
 				botManager.dead = true;
 				this.deadBots.push(botManager);
