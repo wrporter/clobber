@@ -72,16 +72,17 @@ class RandomBot {
 	render(context, point) {
 		// TODO: Don't allow bots to draw outside their allotted 16x16 space.
 
-		// context.fillStyle = "#ffff00";
-		// context.fillRect(point.x - BOT_RADIUS, point.y - BOT_RADIUS, 2 * BOT_RADIUS, 2 * BOT_RADIUS);
-
 		context.drawImage(this.image, point.x - this.world.botRadius, point.y - this.world.botRadius, this.world.botRadius * 2, this.world.botRadius * 2);
+
+		// context.fillStyle = "#ffff00";
+		// context.beginPath();
+		// context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
+		// context.fill();
+		// context.fillStyle = "#000";
 
 		// context.fillStyle = "#FF00FF";
 		// context.font = "normal 8pt Arial";
 		// context.fillText(this.id, point.x - BOT_RADIUS, point.y - BOT_RADIUS);
-
-		// context.fillStyle = "#000";
 	}
 
 	toString() {

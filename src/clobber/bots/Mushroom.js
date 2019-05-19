@@ -17,8 +17,8 @@ export class Mushroom {
 		this.image = new Image();
 		this.image.src = mushroomPng;
 
-		this.bot_bul_thresh = (world.botRadius + world.bulletRadius) + 50;
-		this.bot_bot_thresh = 2 * world.botRadius;
+		this.botBulletThresh = (world.botRadius + world.bulletRadius) + 20;
+		this.botBotThresh = 2 * world.botRadius + 10;
 	}
 
 	getId() {
@@ -87,7 +87,7 @@ export class Mushroom {
 		if (bot == null) {
 			return null;
 		}
-		let botDistance = this.bot_bot_thresh;
+		let botDistance = this.botBotThresh;
 
 		let down = me.y > Math.abs(bot.y - botDistance);
 		let up = me.y < Math.abs(bot.y - botDistance);
@@ -190,7 +190,7 @@ export class Mushroom {
 			|| (this.getYPlus(bullet) < 0 && bullet.y > me.y)
 			|| (this.getYPlus(bullet) > 0 && bullet.y < me.y)) {
 
-			if (me.distance(bullet) < this.bot_bul_thresh * this.world.bulletStepDistance * ((this.getXPlus(bullet) !== 0)
+			if (me.distance(bullet) < this.botBulletThresh * this.world.bulletStepDistance * ((this.getXPlus(bullet) !== 0)
 			&& (this.getYPlus(bullet) !== 0) ? 2 : 1)) {
 				return true;
 			}
@@ -204,14 +204,14 @@ export class Mushroom {
 			let c = ((me.x - bullet.x) * this.getXPlus(bullet) + (me.y - bullet.y) * this.getYPlus(bullet)) / (Math.pow(this.getXPlus(bullet), 2) + Math.pow(this.getYPlus(bullet), 2));
 			let distance = Math.sqrt(Math.pow((me.x - bullet.x - c * this.getXPlus(bullet)), 2) + Math.pow((me.y - bullet.y - c * this.getYPlus(bullet)), 2));
 			// bullet is going in this direction: \
-			if (this.getXPlus(bullet) * this.getYPlus(bullet) > 0 && Math.ceil(Math.abs(distance)) <= this.bot_bul_thresh) {
+			if (this.getXPlus(bullet) * this.getYPlus(bullet) > 0 && Math.ceil(Math.abs(distance)) <= this.botBulletThresh) {
 				if (me.y - me.x - bullet.y + bullet.x >= 0) {
 					direction = Direction.DownLeft;
 				} else {
 					direction = Direction.UpRight;
 				}
 			} // bullet is going in this direction: /
-			else if (this.getXPlus(bullet) * this.getYPlus(bullet) <= 0 && Math.ceil(Math.abs(distance)) <= this.bot_bul_thresh) {
+			else if (this.getXPlus(bullet) * this.getYPlus(bullet) <= 0 && Math.ceil(Math.abs(distance)) <= this.botBulletThresh) {
 				if (me.y + me.x - bullet.y - bullet.x > 0) {
 					direction = Direction.DownRight;
 				} else {
@@ -250,17 +250,17 @@ export class Mushroom {
 	}
 
 	shouldMoveVertical(me, bullet) {
-		let thresh = Math.abs(Math.abs(me.y - bullet.y) - this.bot_bul_thresh);
+		let thresh = Math.abs(Math.abs(me.y - bullet.y) - this.botBulletThresh);
 		return ((this.getXPlus(bullet) > 0 && bullet.x < me.x)
 			|| (this.getXPlus(bullet) < 0 && bullet.x > me.x))
-			&& (thresh <= this.bot_bul_thresh && thresh > 0);
+			&& (thresh <= this.botBulletThresh && thresh > 0);
 	}
 
 	shouldMoveHorizontal(me, bullet) {
-		let thresh = Math.abs(Math.abs(me.x - bullet.x) - this.bot_bul_thresh);
+		let thresh = Math.abs(Math.abs(me.x - bullet.x) - this.botBulletThresh);
 		return ((this.getYPlus(bullet) < 0 && bullet.y > me.y)
 			|| (this.getYPlus(bullet) > 0 && bullet.y < me.y))
-			&& (thresh <= this.bot_bul_thresh && thresh > 0);
+			&& (thresh <= this.botBulletThresh && thresh > 0);
 	}
 
 	getShootDirection(state) {
@@ -332,5 +332,11 @@ export class Mushroom {
 			point.y - this.world.botRadius,
 			this.world.botRadius * 2,
 			this.world.botRadius * 2);
+
+		// context.fillStyle = "#ffff00";
+		// context.beginPath();
+		// context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
+		// context.fill();
+		// context.fillStyle = "#000";
 	}
 }

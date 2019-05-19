@@ -6,6 +6,7 @@ import { Action, Direction } from './BotAction';
 import Bullet from './Bullet';
 import { generateId } from './ID';
 import { Mushroom } from './bots/Mushroom';
+import { Circle, circlesOverlap } from './Shapes';
 
 function getRandomInt(min, max) {
 	min = Math.ceil(min);
@@ -45,7 +46,7 @@ class Game {
 	}
 
 	getMinDistanceToBot(point) {
-		return this.botManagers.reduce((min, otherBot) => Math.min(min, point.distance(otherBot)), Number.MAX_VALUE);
+		return this.botManagers.reduce((min, otherBot) => Math.min(min, point.distance(otherBot.point)), Number.MAX_VALUE);
 	}
 
 	addBotToGame(bot) {
@@ -57,7 +58,9 @@ class Game {
 			if (numTries > 1000) {
 				throw new Error("Failed to find a spot to place the bot.");
 			}
-			point = new Point(getRandomInt(0, this.canvas.width), getRandomInt(0, this.canvas.height));
+			point = new Point(
+				getRandomInt(this.world.botRadius, this.canvas.width - this.world.botRadius),
+				getRandomInt(this.world.botRadius, this.canvas.height - this.world.botRadius));
 			minDistance = this.getMinDistanceToBot(point);
 		} while (minDistance < this.world.minStartDistance);
 		const botManager = new BotManager(bot, point);
@@ -338,35 +341,16 @@ class Game {
 	}
 
 	botAndBulletCollide(bulletPoint, botPoint) {
-		const distX = Math.abs(bulletPoint.x - botPoint.x);
-		const distY = Math.abs(bulletPoint.y - botPoint.y);
-
-		if (distX > (this.world.botRadius + this.world.bulletRadius)) {
-			return false;
-		}
-		if (distY > (this.world.botRadius + this.world.bulletRadius)) {
-			return false;
-		}
-
-		if (distX <= (this.world.botRadius)) {
-			return true;
-		}
-		if (distY <= (this.world.botRadius)) {
-			return true;
-		}
-
-		const dx = distX - this.world.botRadius;
-		const dy = distY - this.world.botRadius;
-		return (dx * dx + dy * dy <= (this.world.bulletRadius * this.world.bulletRadius));
+		const botCircle = new Circle(this.world.botRadius, botPoint.x, botPoint.y);
+		const bulletCircle = new Circle(this.world.bulletRadius, bulletPoint.x, bulletPoint.y);
+		return circlesOverlap(botCircle, bulletCircle);
 	}
 
 	botsCollide(bot1, bot2) {
-		const width = 2 * this.world.botRadius;
+		const botCircle1 = new Circle(this.world.botRadius, bot1.point.x, bot1.point.y);
+		const botCircle2 = new Circle(this.world.botRadius, bot2.point.x, bot2.point.y);
 		return bot1 !== bot2
-			&& bot1.point.x < bot2.point.x + width
-			&& bot1.point.x + width > bot2.point.x
-			&& bot1.point.y < bot2.point.y + width
-			&& bot1.point.y + width > bot2.point.y;
+			&& circlesOverlap(botCircle1, botCircle2);
 	}
 }
 
