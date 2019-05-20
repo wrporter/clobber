@@ -11,5 +11,99 @@
 
 <canvas class="game"></canvas>
 
+<h2>Custom Bots!</h2>
+
+<button type="button" class="new-game">New Game</button>
+<button type="button" class="add-bot">Add Bot</button>
+<button type="button" class="start-game">Start Game</button>
+
+<ol>
+	<li>Click New Game to setup a new game. You want to do this if you want to test modifications to your bot. If you click Start Game between games, all bots from previous games will get added.</li>
+	<li>Add your bot in the code area below.</li>
+	<li>Click Add Bot to add your bot to the game. For each click, a new copy of your bot will get added.</li>
+	<li>Click Start Game to start the game and see it run!</li>
+</ol>
+
+<pre class="bot-pre">
+	<code class="bot-code language-javascript" contenteditable="true">
+class MyBot {
+	constructor(id, team, world) {
+		this.id = id;
+		this.team = team;
+		this.world = world;
+	}
+
+	getId() {
+		return this.id;
+	}
+
+	takeTurn(state) {
+		let action = "None";
+		let direction = "Up";
+
+		switch(MyBot.getRandomInt(2))
+		{
+			case 0:
+				action = "Move";
+				break;
+			case 1:
+				action = "Shoot";
+				break;
+			default:
+				action = "None";
+		}
+
+		switch(MyBot.getRandomInt(8))
+		{
+			case 0:
+				direction = "Up";
+				break;
+			case 1:
+				direction = "Down";
+				break;
+			case 2:
+				direction = "Left";
+				break;
+			case 3:
+				direction = "Right";
+				break;
+			case 4:
+				direction = "UpLeft";
+				break;
+			case 5:
+				direction = "UpRight";
+				break;
+			case 6:
+				direction = "DownRight";
+				break;
+			default:
+				direction = "DownLeft";
+		}
+
+		return {action, direction};
+	}
+
+	render(context, point) {
+		context.fillStyle = "#ffff00";
+		context.beginPath();
+		context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
+		context.fill();
+		context.fillStyle = "#000";
+	}
+
+	toString() {
+		return JSON.stringify({
+			id: this.id,
+			name: this.team
+		}, null, 4);
+	}
+
+	static getRandomInt(max) {
+		return Math.floor(Math.random() * Math.floor(max));
+	}
+}
+	</code>
+</pre>
+
 </body>
 </html>

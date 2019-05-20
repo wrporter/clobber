@@ -1,11 +1,8 @@
-import RandomBot from "./bots/RandomBot";
 import Point from './Point';
 import State, { BotState, BulletState, WorldState } from './State';
 import BotManager from './BotManager';
 import { Action, Direction } from './BotAction';
 import Bullet from './Bullet';
-import { generateId } from './ID';
-import { Mushroom } from './bots/Mushroom';
 import { Circle, circlesOverlap } from './Shapes';
 
 function getRandomInt(min, max) {
@@ -34,13 +31,6 @@ class Game {
 	}
 
 	start() {
-		for (let i = 0; i < 10; i++) {
-			this.addBotToGame(new RandomBot(generateId(), generateId(), this.world.clone()));
-		}
-		for (let i = 0; i < 3; i++) {
-			this.addBotToGame(new Mushroom(generateId(), "mushroom", this.world.clone()));
-		}
-
 		// TODO: This is done to allow images to load. Fix this?
 		setTimeout(() => this.gameLoop(), 10);
 	}

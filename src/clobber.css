@@ -3,3 +3,22 @@
 	display: block;
 	margin: 40px auto;
 }
+
+.bot-pre {
+	margin-top: 40px;
+	position: relative;
+}
+
+.bot-textarea {
+	position: absolute;
+	top: 30px;
+	left: 30px;
+	right: 30px;
+	bottom: 30px;
+	opacity: 0.1;
+	width: calc(100% - 60px);
+	height: calc(100% - 60px);
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
