@@ -1,4 +1,10 @@
 export default class State {
+	/**
+	 * @param myBot {BotState}
+	 * @param bots {BotState[]}
+	 * @param myBullets {BulletState}
+	 * @param bullets {BulletState[]}
+	 */
 	constructor(myBot, bots, myBullets, bullets) {
 		this.myBot = myBot;
 		this.bots = bots;
@@ -12,6 +18,11 @@ export default class State {
 }
 
 export class BotState {
+	/**
+	 * @param id {String}
+	 * @param team {String}
+	 * @param point {Point}
+	 */
 	constructor(id, team, point) {
 		this.id = id;
 		this.team = team;
@@ -24,6 +35,10 @@ export class BotState {
 }
 
 export class BulletState {
+	/**
+	 * @param point {Point}
+	 * @param direction {Direction}
+	 */
 	constructor(point, direction) {
 		this.point = point;
 		this.direction = direction;

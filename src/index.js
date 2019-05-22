@@ -4,6 +4,8 @@ import Game from './clobber/Game';
 import { generateId } from './clobber/ID';
 import RandomBot from './clobber/bots/RandomBot';
 import { Mushroom } from './clobber/bots/Mushroom';
+import DoNothingBot from './clobber/bots/DoNothingBot';
+import PotentialFieldBot from './clobber/bots/PotentialFieldBot';
 
 (() => {
 	const canvas = document.getElementsByClassName("game")[0];
@@ -31,4 +33,39 @@ import { Mushroom } from './clobber/bots/Mushroom';
 		}
 		game.start();
 	});
+
+	document.getElementsByClassName("end-game")[0].addEventListener("click", () => {
+		game.gameOver = true;
+	});
+
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+	// game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+	// game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+	// game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+	// game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+	// game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+	// game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+	// game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+	// game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+	// game.addBotToGame(new DoNothingBot(generateId(), generateId(), game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+	game.start();
 })();
