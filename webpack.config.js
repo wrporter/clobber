@@ -2,8 +2,7 @@ const CleanWebpackPlugin = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 
-module.exports = {
-	devtool: "source-map",
+const config = {
 	entry: {
 		main: "./src/index.js"
 	},
@@ -42,4 +41,12 @@ module.exports = {
 		hot: true,
 		open: true
 	}
+};
+
+module.exports = (env, argv) => {
+	if (argv.mode === "development") {
+		config.devtool = "source-map";
+	}
+
+	return config;
 };
