@@ -1,10 +1,10 @@
-const Action = {
+export const Action = {
 	None: "None",
 	Move: "Move",
 	Shoot: "Shoot"
 };
 
-const Direction = {
+export const Direction = {
 	Up: "Up",
 	Right: "Right",
 	Down: "Down",
@@ -15,12 +15,9 @@ const Direction = {
 	UpLeft: "UpLeft"
 };
 
-class BotAction {
+export default class BotAction {
 	constructor(action, direction) {
 		this.action = action;
 		this.direction = direction;
 	}
 }
-
-export { Action, Direction };
-export default BotAction;
