@@ -8,7 +8,8 @@ http://cs.boisestate.edu/~tim/potentialfields/PfieldsTutorial.pdf
 
  */
 
-const imageData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wUWAS4U8Ynz2QAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAACySURBVDjLtVKxDQMxCDyjzwC/SAr2cRMXmSlF0mSfL36RDPCvkOLtCFtgNwkSssDHcQICAKTIKHZ/LvDMwlGOpbgGGcWiHAAwadDtseB6YUmRg8Eh+b9KUpYTNEnTSUqxkh88mbJvcD1FlraGLKLp1I+HBPvWj00Ca/pW5xZH7ZTXmari8q4z6QHDXCMAnF9vU3bJ/3+IHtjNjzYw2oJ7SCny13uHVCk4TvQA1edq5X5kH7Oacty/CglpAAAAAElFTkSuQmCC";
+const imageStar = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wUWFzorcerWcwAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAACKSURBVDjLpVNBDsAgCCviB3bk/4/bkRcs7rC5GAV0sYmJidqWgkCM8i4XFD2+zgMAwKLu3YRN0Ey9wnORZzUamQwOBrVVsCgSAHrtWZaHfV9SDdEkiZRrHm0Xlkj6MN02trlEGVHUur8lbA2SqV4zCc4oBxY/ARYtHhEZnyYc8ZaIRR+Cxd9pjvQN2HI2aP9iF0cAAAAASUVORK5CYII=";
+const imageRainbowStar = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QAAAAAAAD5Q7t/AAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH4wUXAAQbtyMvMgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAEDSURBVDjLpZMxTsQwEEWfzUKfSAiqvcAWKTgBXAFOgcQRtqLbNueIxA1WHIDVcoU06WjoQMmnSGyt7cQgMVKkKNabP/l/DPnS9CyWzcHfXNBv1+SaWP5ZNqdut9cA9F2xOMVq6cDBPH7GngRlnFoCnsAvV2v/6eH1OHa6PQA3WMCc85XAZ8+tf7+37+H/TTBgnAe+STx2rH4Kz5rXd4X6rhCgZqjUDJUAmb0Eb8lerJbiaYbKq5o96O7wa4ya4vJjB4ZNurtNG6SR7MEsjIMvFydQM1QzsHGGBbDKOtkJb9hoVnKJBGi3aaWylsranxunHuVtMrfTTYD5eBobRJv5l/LMD8dIfXZ8EpdLAAAAAElFTkSuQmCC";
 
 class FieldObject {
 	/**
@@ -19,12 +20,12 @@ class FieldObject {
 	 * fields.
 	 * @param tangentialModifier {Number} - Should be + or - 90 degrees or Math.PI / 2.
 	 */
-	constructor(point, radius, spread, strength, tangentialModifier) {
+	constructor(point, radius, spread, strength, tangentialModifier = 1) {
 		this.point = point;
 		this.radius = radius;
 		this.spread = spread;
 		this.strength = strength;
-		this.tangentialModifer = tangentialModifier || 1;
+		this.tangentialModifer = tangentialModifier;
 	}
 }
 
@@ -36,7 +37,7 @@ class PotentialFieldBot {
 		this.shotClock = 0;
 
 		this.image = new Image();
-		this.image.src = imageData;
+		this.image.src = imageStar;
 		this.history = [];
 	}
 
@@ -77,7 +78,7 @@ class PotentialFieldBot {
 			// avoid getting cornered
 			this.getAvoidWallField(state),
 			// avoid cyclic behavior
-			...this.getPastBehaviorFields(state),
+			// ...this.getPastBehaviorFields(state),
 		].reduce((delta, current) => [delta[0] + current[0], delta[1] + current[1]]);
 
 		direction = this.getDirection(deltaX, deltaY);
