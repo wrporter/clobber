@@ -14,18 +14,10 @@ const config = {
 	},
 	module: {
 		rules: [
-			{ test: /\.js$/, exclude: /node_modules/, loader: "babel-loader" },
 			{
 				test: /\.s?css$/,
 				use: ["style-loader", "css-loader", "sass-loader"]
 			},
-			{
-				test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/,
-				loader: "url-loader",
-				options: {
-					limit: 10000
-				}
-			}
 		]
 	},
 	plugins: [
