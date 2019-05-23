@@ -1,4 +1,5 @@
 .game {
+	background-color: black;
 	border: 1px solid blue;
 	display: block;
 	margin: 40px auto;

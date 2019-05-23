@@ -36,9 +36,16 @@ class PotentialFieldBot {
 		this.world = world;
 		this.shotClock = 0;
 
+		this.history = [];
+		this.historyClock = 0;
+		this.historyInterval = 10;
+		this.maxHistory = 100;
+
 		this.image = new Image();
 		this.image.src = imageStar;
-		this.history = [];
+		this.shootImage = new Image();
+		this.shootImage.src = imageRainbowStar;
+		this.shooting = false;
 	}
 
 	getId() {
@@ -47,10 +54,7 @@ class PotentialFieldBot {
 
 	takeTurn(state) {
 		this.shotClock++;
-		this.history.push(state.myBot.point);
-		if (this.history.length >= 100) {
-			this.history.pop();
-		}
+		this.shooting = false;
 
 		let action = Action.None;
 		let direction = null;
@@ -62,24 +66,34 @@ class PotentialFieldBot {
 			this.shotClock = 0;
 			action = Action.Shoot;
 			direction = this.getShootDirection(state, closestEnemy);
+			this.shooting = true;
 
 			return new BotAction(action, direction);
 		}
 
-		const [deltaX, deltaY] = [
+		let [deltaX, deltaY] = [
 			// TODO: Experiment with field strength
-			// prefer the center
-			this.getAttractiveField(state, new FieldObject(new Point(this.world.width / 2, this.world.height / 2), 1, 1, 1)),
 			// move toward the closest enemy
-			this.getAttractiveField(state, new FieldObject(closestEnemy.point, this.world.botRadius, 1, 2)),
+			this.getAttractiveField(state, new FieldObject(closestEnemy.point, this.world.botRadius, 1, 1)),
 			// avoid lethal objects
 			...this.getAvoidEnemyFields(state),
 			...this.getAvoidBulletFields(state),
 			// avoid getting cornered
 			this.getAvoidWallField(state),
 			// avoid cyclic behavior
-			// ...this.getPastBehaviorFields(state),
+			...this.getPastBehaviorFields(state),
 		].reduce((delta, current) => [delta[0] + current[0], delta[1] + current[1]]);
+
+		if (
+			state.myBot.point.x < this.world.botRadius * 8
+			|| state.myBot.point.x > this.world.width - this.world.botRadius * 8
+			|| state.myBot.point.y < this.world.botRadius * 8
+			|| state.myBot.point.y > this.world.width - this.world.botRadius * 8
+		) {
+			// prefer the center
+			const centerField = new FieldObject(new Point(this.world.width / 2, this.world.height / 2), 1, 10, 5, Math.PI / 2);
+			[deltaX, deltaY] = this.addDelta([deltaX, deltaY], this.getAttractiveField(state, centerField));
+		}
 
 		direction = this.getDirection(deltaX, deltaY);
 
@@ -87,7 +101,25 @@ class PotentialFieldBot {
 			action = Action.Move;
 		}
 
+		this.updateHistory(state);
+
 		return new BotAction(action, direction);
+	}
+
+	updateHistory(state) {
+		if (this.history.length >= this.maxHistory) {
+			this.history.pop();
+		}
+
+		this.historyClock++;
+		if (this.historyClock % this.historyInterval === 0) {
+			this.historyClock = 0;
+			this.history.push(state.myBot.point);
+		}
+	}
+
+	addDelta(current, addition) {
+		return [current[0] + addition[0], current[1] + addition[1]];
 	}
 
 	getShootDirection(state, enemy) {
@@ -173,10 +205,9 @@ class PotentialFieldBot {
 
 	getAvoidEnemyFields(state) {
 		return state.bots.map(bot => {
-			const safeBulletDistance = 40; // TODO: calculate based on how fast I can get out of bullet speed range
+			const safeBulletDistance = 60; // TODO: calculate based on how fast I can get out of bullet speed range
 			const spread = 2 * this.world.botRadius + safeBulletDistance;
-			const fieldObject = new FieldObject(bot.point, this.world.botRadius, spread, 1);
-			return this.getRepulsiveField(state, fieldObject);
+			return this.getRepulsiveField(state, new FieldObject(bot.point, this.world.botRadius, spread, 2));
 		});
 	}
 
@@ -184,7 +215,7 @@ class PotentialFieldBot {
 		return state.bullets.map(bullet => {
 			const safeBulletDistance = 40; // TODO: calculate based on how fast I can get out of bullet speed range
 			const spread = 2 * this.world.bulletRadius + safeBulletDistance;
-			const fieldObject = new FieldObject(bullet.point, this.world.bulletRadius, spread, 2);
+			const fieldObject = new FieldObject(bullet.point, this.world.bulletRadius, spread, 5);
 			return this.getRepulsiveField(state, fieldObject);
 		});
 	}
@@ -207,13 +238,19 @@ class PotentialFieldBot {
 			deltaY = -distanceFromWall;
 		}
 
-		return [deltaX, deltaY];
+		return [
+			this.getRepulsiveField(state, new FieldObject(new Point(0, 0), this.world.botRadius, this.world.botRadius * 4, 5)),
+			this.getRepulsiveField(state, new FieldObject(new Point(0, 0), this.world.botRadius, this.world.botRadius * 4, 5)),
+			this.getRepulsiveField(state, new FieldObject(new Point(0, 0), this.world.botRadius, this.world.botRadius * 4, 5)),
+			this.getRepulsiveField(state, new FieldObject(new Point(0, 0), this.world.botRadius, this.world.botRadius * 4, 5)),
+		].reduce((delta, current) => [delta[0] + current[0], delta[1] + current[1]], [deltaX, deltaY]);
 	}
 
 	getPastBehaviorFields(state) {
-		return this.history.map(point => {
+		return this.history.map((point, index, history) => {
+			const strength = (history.length - index) * (1 / this.maxHistory);
 			const spread = this.world.bulletRadius;
-			const fieldObject = new FieldObject(point, spread, spread, 1, Math.PI / 2);
+			const fieldObject = new FieldObject(point, spread, spread, strength, Math.PI / 2);
 			return this.getRepulsiveField(state, fieldObject);
 		});
 	}
@@ -264,11 +301,19 @@ class PotentialFieldBot {
 
 	render(context, point) {
 		// TODO: Add animations for moving in various directions and shooting
-		context.drawImage(this.image,
-			point.x - this.world.botRadius,
-			point.y - this.world.botRadius,
-			this.world.botRadius * 2,
-			this.world.botRadius * 2);
+		if (this.shooting || this.shotClock < 10) {
+			context.drawImage(this.shootImage,
+				point.x - this.world.botRadius,
+				point.y - this.world.botRadius,
+				this.world.botRadius * 2,
+				this.world.botRadius * 2);
+		} else {
+			context.drawImage(this.image,
+				point.x - this.world.botRadius,
+				point.y - this.world.botRadius,
+				this.world.botRadius * 2,
+				this.world.botRadius * 2);
+		}
 	}
 
 	toString() {
