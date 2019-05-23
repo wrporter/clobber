@@ -11,7 +11,7 @@ WORKDIR /src
 COPY package*.json ./
 RUN npm ci --loglevel=warn
 
-COPY .babelrc webpack.config.js  ./
+COPY webpack.config.js  ./
 COPY src src
 RUN npm run ci
 
