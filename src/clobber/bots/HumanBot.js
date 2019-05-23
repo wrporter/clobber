@@ -1,14 +1,18 @@
 import BotAction, { Action, Direction } from '../BotAction';
 
 /*
-This bot can be controlled by a human. Use the arrow keys to move and the space bar to shoot.
+This bot can be controlled by a human. Use the arrow keys to move and the the E (up), D (down), S (left), and F (right) keys to shoot in the provided
+direction.
  */
+
+const KEY_CODES = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyE", "KeyD", "KeyS", "KeyF"];
 
 class HumanBot {
 	constructor(id, team, world) {
 		this.id = id;
 		this.team = team;
 		this.world = world;
+		this.shotClock = 0;
 
 		this.keys = {};
 
@@ -17,14 +21,14 @@ class HumanBot {
 	}
 
 	captureKey(event) {
-		if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
+		if(KEY_CODES.indexOf(event.code) > -1) {
 			event.preventDefault();
 		}
 		this.keys[event.code] = true;
 	}
 
 	releaseKey(event) {
-		if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
+		if(KEY_CODES.indexOf(event.code) > -1) {
 			event.preventDefault();
 		}
 		this.keys[event.code] = false;
@@ -35,11 +39,33 @@ class HumanBot {
 	}
 
 	takeTurn(state) {
+		this.shotClock++;
 		let action = Action.None;
 		let direction = null;
 
-		if (this.keys["Space"]) {
-			action = Action.Shoot;
+		if (this.keys["KeyE"]) {
+			direction = Direction.Up;
+			if (this.keys["KeyF"]) {
+				direction = Direction.UpRight;
+			} else if (this.keys["KeyS"]) {
+				direction = Direction.UpLeft;
+			}
+		} else if (this.keys["KeyD"]) {
+			direction = Direction.Down;
+			if (this.keys["KeyF"]) {
+				direction = Direction.DownRight;
+			} else if (this.keys["KeyS"]) {
+				direction = Direction.DownLeft;
+			}
+		} else if (this.keys["KeyF"]) {
+			direction = Direction.Right;
+		} else if (this.keys["KeyS"]) {
+			direction = Direction.Left;
+		}
+
+		if (direction !== null && this.shotClock % this.world.shootFrequency === 0) {
+			this.shotClock = 0;
+			return new BotAction(Action.Shoot, direction);
 		}
 
 		if (this.keys["ArrowUp"]) {
