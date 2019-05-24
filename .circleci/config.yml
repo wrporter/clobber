@@ -8,6 +8,10 @@ jobs:
       - checkout
       - run: .ci/build-ci.sh
       - run: .ci/coverage.sh
+      - store_artifacts:
+          path: coverage
+      - store_test_results:
+          path: coverage
       - codecov/upload:
           file: coverage/clover.xml
       - run: .ci/build.sh
