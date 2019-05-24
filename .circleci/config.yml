@@ -4,4 +4,9 @@ jobs:
     machine: true
     steps:
       - checkout
+      - run: .ci/build-ci.sh
+      - run: .ci/coverage.sh
+      - store_artifacts:
+          path: coverage
       - run: .ci/build.sh
+
