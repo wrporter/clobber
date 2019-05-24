@@ -21,14 +21,14 @@ class HumanBot {
 	}
 
 	captureKey(event) {
-		if(KEY_CODES.indexOf(event.code) > -1) {
+		if (KEY_CODES.indexOf(event.code) > -1) {
 			event.preventDefault();
 		}
 		this.keys[event.code] = true;
 	}
 
 	releaseKey(event) {
-		if(KEY_CODES.indexOf(event.code) > -1) {
+		if (KEY_CODES.indexOf(event.code) > -1) {
 			event.preventDefault();
 		}
 		this.keys[event.code] = false;
@@ -63,9 +63,13 @@ class HumanBot {
 			direction = Direction.Left;
 		}
 
-		if (direction !== null && this.shotClock % this.world.shootFrequency === 0) {
-			this.shotClock = 0;
-			return new BotAction(Action.Shoot, direction);
+		if (direction !== null) {
+			if (this.shotClock % this.world.shootFrequency === 0) {
+				this.shotClock = 0;
+				return new BotAction(Action.Shoot, direction);
+			} else {
+				direction = null;
+			}
 		}
 
 		if (this.keys["ArrowUp"]) {
@@ -96,11 +100,11 @@ class HumanBot {
 	}
 
 	render(context, point) {
-		context.fillStyle = "#ffff00";
+		context.fillStyle = "#FFFF00";
 		context.beginPath();
 		context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
 		context.fill();
-		context.fillStyle = "#000";
+		context.fillStyle = "#000000";
 	}
 
 	toString() {
