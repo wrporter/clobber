@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/wrporter/clobber.svg?style=svg)](https://circleci.com/gh/wrporter/clobber)
+[![CircleCI](https://circleci.com/gh/wrporter/clobber.svg?style=shield&circle-token=04b8f24fc922c36549650e82dfea00cbda077c23)](https://circleci.com/gh/wrporter/clobber)
 [![codecov](https://codecov.io/gh/wrporter/clobber/branch/master/graph/badge.svg?token=lzCHCfmHN8)](https://codecov.io/gh/wrporter/clobber)
 
 # Clobber Bots
