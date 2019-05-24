@@ -3,4 +3,5 @@
 !package.json
 !package-lock.json
 !webpack.config.js
+!.eslintrc.yml
 !.ci/Caddyfile

@@ -1,34 +1,58 @@
 {
-	"name": "clobber",
-	"version": "1.0.0",
-	"description": "Clobber Bots AI game",
-	"scripts": {
-		"build": "webpack --mode=production",
-		"ci": "npm run build",
-		"start": "webpack-dev-server --mode development"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/wrporter/clobber.git"
-	},
-	"author": "Wesley Porter <wesleyrporter@gmail.com>",
-	"license": "ISC",
-	"bugs": {
-		"url": "https://github.com/wrporter/clobber/issues"
-	},
-	"homepage": "https://github.com/wrporter/clobber#readme",
-	"devDependencies": {
-		"clean-webpack-plugin": "^2.0.2",
-		"css-loader": "^2.1.1",
-		"html-webpack-plugin": "^3.2.0",
-		"node-sass": "^4.12.0",
-		"sass-loader": "^7.1.0",
-		"style-loader": "^0.23.1",
-		"webpack": "^4.32.2",
-		"webpack-cli": "^3.3.2",
-		"webpack-dev-server": "^3.4.1"
-	},
-	"dependencies": {
-		"prismjs": "^1.16.0"
-	}
+    "name": "clobber",
+    "version": "1.0.0",
+    "description": "Clobber Bots AI game",
+    "scripts": {
+        "build": "webpack --mode=production",
+        "ci": "npm run lint && npm run test && npm run build",
+        "lint": "eslint ./",
+        "lint:fix": "npm run lint -- --fix",
+        "start": "webpack-dev-server --mode development",
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/wrporter/clobber.git"
+    },
+    "author": "Wesley Porter <wesleyrporter@gmail.com>",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/wrporter/clobber/issues"
+    },
+    "homepage": "https://github.com/wrporter/clobber#readme",
+    "devDependencies": {
+        "@babel/core": "^7.4.5",
+        "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+        "clean-webpack-plugin": "^2.0.2",
+        "css-loader": "^2.1.1",
+        "eslint": "^5.16.0",
+        "html-webpack-plugin": "^3.2.0",
+        "jest": "^24.8.0",
+        "node-sass": "^4.12.0",
+        "sass-loader": "^7.1.0",
+        "style-loader": "^0.23.1",
+        "webpack": "^4.32.2",
+        "webpack-cli": "^3.3.2",
+        "webpack-dev-server": "^3.4.1"
+    },
+    "dependencies": {
+        "prismjs": "^1.16.0"
+    },
+    "babel": {
+        "plugins": [
+            "transform-es2015-modules-commonjs"
+        ]
+    },
+    "jest": {
+        "collectCoverage": true,
+        "collectCoverageFrom": [ "src/**/*.js" ],
+        "coverageThreshold": {
+            "global": {
+                "lines": 0,
+                "branches": 0,
+                "functions": 0,
+                "statements": 0
+            }
+        }
+    }
 }
