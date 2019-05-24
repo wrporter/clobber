@@ -1,4 +1,4 @@
-[![Build Status](https://circleci.com/gh/wrporter/clobber.svg?style=svg)](https://circleci.com/gh/wrporter/clobber)
+[![CircleCI](https://circleci.com/gh/wrporter/clobber.svg?style=svg)](https://circleci.com/gh/wrporter/clobber)
 
 # Clobber Bots
 

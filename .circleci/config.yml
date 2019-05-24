@@ -9,6 +9,6 @@ jobs:
       - run: .ci/build-ci.sh
       - run: .ci/coverage.sh
       - codecov/upload:
-          file: coverage
+          file: coverage/clover.xml
       - run: .ci/build.sh
 
