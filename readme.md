@@ -1,6 +1,6 @@
-# Clobber Bots
+[![Build Status](https://circleci.com/gh/wrporter/clobber.svg?style=svg)](https://circleci.com/gh/wrporter/clobber)
 
-[![CircleCI](https://circleci.com/gh/wrporter/clobber.svg?style=svg)](https://circleci.com/gh/wrporter/clobber)
+# Clobber Bots
 
 Welcome to Clobber Bots! The goals I have for creating this game are to:
 
