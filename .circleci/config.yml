@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  codecov: codecov/codecov@1.0.4
 jobs:
   build:
     machine: true
@@ -6,7 +8,7 @@ jobs:
       - checkout
       - run: .ci/build-ci.sh
       - run: .ci/coverage.sh
-      - store_test_results:
-          path: coverage
+      - codecov/upload:
+          file: coverage
       - run: .ci/build.sh
 
