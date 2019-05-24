@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   build:
     machine: true
@@ -6,7 +6,7 @@ jobs:
       - checkout
       - run: .ci/build-ci.sh
       - run: .ci/coverage.sh
-      - store_artifacts:
+      - store_test_results:
           path: coverage
       - run: .ci/build.sh
 
