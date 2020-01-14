@@ -4,6 +4,7 @@ import BotManager from "./BotManager";
 import { Action, Direction } from "./BotAction";
 import Bullet from "./Bullet";
 import { Circle, circlesOverlap } from "./Shapes";
+import GameRenderer from "./GameRenderer";
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -18,7 +19,6 @@ class Game {
         this.canvas = canvas;
         this.canvas.width = this.world.width;
         this.canvas.height = this.world.height;
-        this.ctx = canvas.getContext("2d");
 
         this.botManagers = [];
         this.deadBots = [];
@@ -27,7 +27,9 @@ class Game {
         this.gameOver = false;
 
         this.fps = 0;
-        this.times = [];
+        this.fpsTimes = [];
+
+        this.renderer = new GameRenderer(this.canvas, this.world);
     }
 
     start() {
@@ -59,22 +61,26 @@ class Game {
 
     gameLoop() {
         if (this.gameOver) {
-            this.renderGameOver();
+            this.renderer.renderGameOver(this.botManagers, this.deadBots);
         } else {
             this.collectBotActions();
             this.performBotActions();
             this.updateBulletPositions();
-            this.render();
+
+            this.renderer.render(this.botManagers, this.bullets);
+            this.renderer.renderFPS(this.fps);
+
             this.handleCollisions();
             this.checkGameOver();
 
             requestAnimationFrame(() => {
                 const now = performance.now();
-                while (this.times.length > 0 && this.times[0] <= now - 1000) {
-                    this.times.shift();
+                while (this.fpsTimes.length > 0 && this.fpsTimes[0] <= now - 1000) {
+                    this.fpsTimes.shift();
                 }
-                this.times.push(now);
-                this.fps = this.times.length;
+                this.fpsTimes.push(now);
+                this.fps = this.fpsTimes.length;
+                // setTimeout(() => this.gameLoop(), 50);
                 this.gameLoop();
             });
         }
@@ -145,11 +151,11 @@ class Game {
                 if (point.y < this.world.botRadius) {
                     point.y = this.world.botRadius;
                 }
-                if (point.x >= this.ctx.canvas.width - this.world.botRadius) {
-                    point.x = this.ctx.canvas.width - this.world.botRadius;
+                if (point.x >= this.world.width - this.world.botRadius) {
+                    point.x = this.world.width - this.world.botRadius;
                 }
-                if (point.y >= this.ctx.canvas.height - this.world.botRadius) {
-                    point.y = this.ctx.canvas.height - this.world.botRadius;
+                if (point.y >= this.world.height - this.world.botRadius) {
+                    point.y = this.world.height - this.world.botRadius;
                 }
                 botManager.point = point;
             } else if (action === Action.Shoot && botManager.shotClock + this.world.shootFrequency === 0) {
@@ -171,8 +177,8 @@ class Game {
             bullet.point = this.getUpdatedPoint(bullet.direction, bullet.point, this.world.bulletStepDistance);
             if (bullet.point.x <= -this.world.bulletRadius
 				|| bullet.point.y <= -this.world.bulletRadius
-				|| bullet.point.x >= this.ctx.canvas.width + this.world.bulletRadius
-				|| bullet.point.y >= this.ctx.canvas.height + this.world.bulletRadius) {
+				|| bullet.point.x >= this.world.width + this.world.bulletRadius
+				|| bullet.point.y >= this.world.height + this.world.bulletRadius) {
                 bullets.splice(index, 1);
             }
         });
@@ -204,80 +210,6 @@ class Game {
         }
 
         return updatedPoint;
-    }
-
-    clearScreen() {
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-
-    render() {
-        this.clearScreen();
-        this.botManagers.forEach(bot => bot.render(this.ctx));
-        this.bullets.forEach(bullet => bullet.render(this.ctx));
-        this.renderFPS();
-    }
-
-    renderFPS() {
-        this.ctx.fillStyle = "#FF00FF";
-        this.ctx.font = "normal 12pt Arial";
-        this.ctx.fillText(Math.round(this.fps) + " fps", 4, 18);
-
-        this.ctx.fillStyle = "#000000";
-    }
-
-    renderGameOver() {
-        this.clearScreen();
-        this.ctx.fillStyle = "#0000FF";
-        this.ctx.font = "normal 12pt Arial";
-        this.ctx.textBaseline = "middle";
-
-        let x = 12;
-        let y = 20;
-
-        this.ctx.fillText("Scoreboard", x, y);
-
-        y += 20;
-
-        this.ctx.fillStyle = "#00FF00";
-        this.ctx.fillText("Bot", x, y);
-        this.ctx.fillText("Score", x + 150, y);
-        this.ctx.fillText("Kills", x + 225, y);
-        this.ctx.fillText("Survive", x + 300, y);
-
-        y += 20;
-
-        this.botManagers.concat(this.deadBots)
-            .map(bm => {
-                bm.score = Object.keys(bm.kills).length * this.world.killPoints
-					+ (!bm.dead ? this.world.survivePoints : 0);
-                return bm;
-            }).sort((bm1, bm2) => {
-                return bm2.score - bm1.score;
-            }
-            ).forEach(bm => {
-                // TODO: Bots that are larger than 16x16 based on world config do not render well here. Need to account for bot size here.
-                let colX = x + this.world.botRadius;
-                bm.bot.render(this.ctx, new Point(colX, y));
-
-                colX += this.world.botRadius + 8;
-                this.ctx.fillStyle = "#FF0000";
-                const winnerId = bm.bot.getId();
-                this.ctx.fillText(winnerId, colX, y);
-
-                colX = x + 150;
-                this.ctx.fillStyle = "#FFFF00";
-                this.ctx.fillText(bm.score, colX, y);
-
-                colX = x + 225;
-                this.ctx.fillStyle = "#FFFF00";
-                this.ctx.fillText(Object.keys(bm.kills).length, colX, y);
-
-                colX = x + 300;
-                this.ctx.fillStyle = "#FFFF00";
-                this.ctx.fillText(bm.dead ? 0 : 1, colX, y);
-
-                y += 20;
-            });
     }
 
     handleCollisions() {

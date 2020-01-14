@@ -10,8 +10,18 @@ import HumanBot from "./clobber/bots/HumanBot";
 function addBots(game) {
     game.addBotToGame(new HumanBot(generateId(), "human", game.world.clone()));
     game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+    game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+    game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+    game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
+    game.addBotToGame(new Mushroom(generateId(), "mushroom", game.world.clone()));
     game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
-    game.addBotToGame(new PotentialFieldBot(generateId(), "pikachu", game.world.clone()));
+    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
+    game.addBotToGame(new PotentialFieldBot(generateId(), "star", game.world.clone()));
+    game.addBotToGame(new PotentialFieldBot(generateId(), "star", game.world.clone()));
+    game.addBotToGame(new PotentialFieldBot(generateId(), "star", game.world.clone()));
+    game.addBotToGame(new PotentialFieldBot(generateId(), "star", game.world.clone()));
+    game.addBotToGame(new PotentialFieldBot(generateId(), "star", game.world.clone()));
 }
 
 (() => {

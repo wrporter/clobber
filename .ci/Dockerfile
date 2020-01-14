@@ -1,7 +1,7 @@
 ###############################################################################
 # Build Static Assets
 ###############################################################################
-FROM alpine:3.9 AS static
+FROM alpine:3.11 AS static
 LABEL maintainer="wesleyrporter@gmail.com"
 
 RUN apk add --no-cache nodejs nodejs-npm

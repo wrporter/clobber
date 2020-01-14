@@ -2,7 +2,7 @@ export default class State {
     /**
 	 * @param myBot {BotState}
 	 * @param bots {BotState[]}
-	 * @param myBullets {BulletState}
+	 * @param myBullets {BulletState[]}
 	 * @param bullets {BulletState[]}
 	 */
     constructor(myBot, bots, myBullets, bullets) {
@@ -51,8 +51,8 @@ export class BulletState {
 
 export class WorldState {
     constructor() {
-        this.width = 400;
-        this.height = 400;
+        this.width = 800;
+        this.height = 800;
 
         this.botRadius = 8;
         this.bulletRadius = 2;
