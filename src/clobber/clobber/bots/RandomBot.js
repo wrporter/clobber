@@ -1,5 +1,5 @@
-import * as images from "./images";
-import BotAction, { Action, Direction } from "../BotAction";
+import * as images from './images';
+import BotAction, { Action, Direction } from '../BotAction';
 const IMAGES = [images.bird, images.duck, images.fish, images.frog, images.owl];
 
 function getRandomImage() {

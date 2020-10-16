@@ -1,19 +1,19 @@
-import Point from "./Point";
+import Point from './Point';
 
-describe("Point", () => {
-    describe("constructor", () => {
-        it("sets x", () => {
+describe('Point', () => {
+    describe('constructor', () => {
+        it('sets x', () => {
             const point = new Point(3, 5);
             expect(point.x).toEqual(3);
         });
 
-        it("sets y", () => {
+        it('sets y', () => {
             const point = new Point(3, 5);
             expect(point.x).toEqual(3);
         });
     });
 
-    describe("distance", () => {
+    describe('distance', () => {
         const tests = [
             {x1: 3, y1: 5, x2: 8, y2: 8, distance: 5.8309518948453},
             {x1: 2, y1: 2, x2: 4, y2: 4, distance: 2.8284271247461903},
@@ -31,8 +31,8 @@ describe("Point", () => {
         });
     });
 
-    describe("clone", () => {
-        it("returns a deep copy", () => {
+    describe('clone', () => {
+        it('returns a deep copy', () => {
             const point = new Point(0, 2);
             const clone = point.clone();
             expect(clone).toEqual(point);
@@ -43,10 +43,10 @@ describe("Point", () => {
         });
     });
 
-    describe("toString", () => {
-        it("returns a string representation of a point", () => {
+    describe('toString', () => {
+        it('returns a string representation of a point', () => {
             const point = new Point(1, 2);
-            expect(point.toString()).toEqual("(1, 2)");
+            expect(point.toString()).toEqual('(1, 2)');
         });
     });
 });

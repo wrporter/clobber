@@ -1,4 +1,4 @@
-import BotAction, { Action, Direction } from "../BotAction";
+import BotAction, { Action, Direction } from '../BotAction';
 
 class DoNothingBot {
     constructor(id, team, world) {
@@ -16,11 +16,11 @@ class DoNothingBot {
     }
 
     render(context, point) {
-        context.fillStyle = "#FFFFFF";
+        context.fillStyle = '#FFFFFF';
         context.beginPath();
         context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
         context.fill();
-        context.fillStyle = "#000000";
+        context.fillStyle = '#000000';
     }
 
     toString() {

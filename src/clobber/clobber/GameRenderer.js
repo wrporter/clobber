@@ -1,9 +1,9 @@
-import Point from "./Point";
+import Point from './Point';
 
 export default class GameRenderer {
     constructor(canvas, world) {
         this.canvas = canvas;
-        this.context = canvas.getContext("2d");
+        this.context = canvas.getContext('2d');
         this.world = world;
     }
 
@@ -18,31 +18,31 @@ export default class GameRenderer {
     }
 
     renderFPS(fps) {
-        this.context.fillStyle = "#FF00FF";
-        this.context.font = "normal 12pt Arial";
-        this.context.fillText(Math.round(fps) + " fps", 4, 18);
+        this.context.fillStyle = '#FF00FF';
+        this.context.font = 'normal 12pt Arial';
+        this.context.fillText(Math.round(fps) + ' fps', 4, 18);
 
-        this.context.fillStyle = "#000000";
+        this.context.fillStyle = '#000000';
     }
 
     renderGameOver(botManagers, deadBots) {
         this.clearScreen();
-        this.context.fillStyle = "#0000FF";
-        this.context.font = "normal 12pt Arial";
-        this.context.textBaseline = "middle";
+        this.context.fillStyle = '#0000FF';
+        this.context.font = 'normal 12pt Arial';
+        this.context.textBaseline = 'middle';
 
         let x = 12;
         let y = 20;
 
-        this.context.fillText("Scoreboard", x, y);
+        this.context.fillText('Scoreboard', x, y);
 
         y += 20;
 
-        this.context.fillStyle = "#00FF00";
-        this.context.fillText("Bot", x, y);
-        this.context.fillText("Score", x + 150, y);
-        this.context.fillText("Kills", x + 225, y);
-        this.context.fillText("Survive", x + 300, y);
+        this.context.fillStyle = '#00FF00';
+        this.context.fillText('Bot', x, y);
+        this.context.fillText('Score', x + 150, y);
+        this.context.fillText('Kills', x + 225, y);
+        this.context.fillText('Survive', x + 300, y);
 
         y += 20;
 
@@ -59,20 +59,20 @@ export default class GameRenderer {
                 bm.bot.render(this.context, new Point(colX, y));
 
                 colX += this.world.botRadius + 8;
-                this.context.fillStyle = "#FF0000";
+                this.context.fillStyle = '#FF0000';
                 const winnerId = bm.bot.getId();
                 this.context.fillText(winnerId, colX, y);
 
                 colX = x + 150;
-                this.context.fillStyle = "#FFFF00";
+                this.context.fillStyle = '#FFFF00';
                 this.context.fillText(bm.score, colX, y);
 
                 colX = x + 225;
-                this.context.fillStyle = "#FFFF00";
+                this.context.fillStyle = '#FFFF00';
                 this.context.fillText(Object.keys(bm.kills).length, colX, y);
 
                 colX = x + 300;
-                this.context.fillStyle = "#FFFF00";
+                this.context.fillStyle = '#FFFF00';
                 this.context.fillText(bm.dead ? 0 : 1, colX, y);
 
                 y += 20;

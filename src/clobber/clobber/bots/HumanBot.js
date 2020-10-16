@@ -1,11 +1,11 @@
-import BotAction, { Action, Direction } from "../BotAction";
+import BotAction, { Action, Direction } from '../BotAction';
 
 /*
 This bot can be controlled by a human. Use the arrow keys to move and the the E (up), D (down), S (left), and F (right) keys to shoot in the provided
 direction.
  */
 
-const KEY_CODES = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "KeyE", "KeyD", "KeyS", "KeyF"];
+const KEY_CODES = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyE', 'KeyD', 'KeyS', 'KeyF'];
 
 class HumanBot {
     constructor(id, team, world) {
@@ -16,8 +16,8 @@ class HumanBot {
 
         this.keys = {};
 
-        document.addEventListener("keydown", (event) => this.captureKey(event));
-        document.addEventListener("keyup", (event) => this.releaseKey(event));
+        document.addEventListener('keydown', (event) => this.captureKey(event));
+        document.addEventListener('keyup', (event) => this.releaseKey(event));
     }
 
     captureKey(event) {
@@ -43,23 +43,23 @@ class HumanBot {
         let action = Action.None;
         let direction = null;
 
-        if (this.keys["KeyE"]) {
+        if (this.keys['KeyE']) {
             direction = Direction.Up;
-            if (this.keys["KeyF"]) {
+            if (this.keys['KeyF']) {
                 direction = Direction.UpRight;
-            } else if (this.keys["KeyS"]) {
+            } else if (this.keys['KeyS']) {
                 direction = Direction.UpLeft;
             }
-        } else if (this.keys["KeyD"]) {
+        } else if (this.keys['KeyD']) {
             direction = Direction.Down;
-            if (this.keys["KeyF"]) {
+            if (this.keys['KeyF']) {
                 direction = Direction.DownRight;
-            } else if (this.keys["KeyS"]) {
+            } else if (this.keys['KeyS']) {
                 direction = Direction.DownLeft;
             }
-        } else if (this.keys["KeyF"]) {
+        } else if (this.keys['KeyF']) {
             direction = Direction.Right;
-        } else if (this.keys["KeyS"]) {
+        } else if (this.keys['KeyS']) {
             direction = Direction.Left;
         }
 
@@ -72,23 +72,23 @@ class HumanBot {
             }
         }
 
-        if (this.keys["ArrowUp"]) {
+        if (this.keys['ArrowUp']) {
             direction = Direction.Up;
-            if (this.keys["ArrowRight"]) {
+            if (this.keys['ArrowRight']) {
                 direction = Direction.UpRight;
-            } else if (this.keys["ArrowLeft"]) {
+            } else if (this.keys['ArrowLeft']) {
                 direction = Direction.UpLeft;
             }
-        } else if (this.keys["ArrowDown"]) {
+        } else if (this.keys['ArrowDown']) {
             direction = Direction.Down;
-            if (this.keys["ArrowRight"]) {
+            if (this.keys['ArrowRight']) {
                 direction = Direction.DownRight;
-            } else if (this.keys["ArrowLeft"]) {
+            } else if (this.keys['ArrowLeft']) {
                 direction = Direction.DownLeft;
             }
-        } else if (this.keys["ArrowRight"]) {
+        } else if (this.keys['ArrowRight']) {
             direction = Direction.Right;
-        } else if (this.keys["ArrowLeft"]) {
+        } else if (this.keys['ArrowLeft']) {
             direction = Direction.Left;
         }
 
@@ -100,11 +100,11 @@ class HumanBot {
     }
 
     render(context, point) {
-        context.fillStyle = "#FFFF00";
+        context.fillStyle = '#FFFF00';
         context.beginPath();
         context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
         context.fill();
-        context.fillStyle = "#000000";
+        context.fillStyle = '#000000';
     }
 
     toString() {

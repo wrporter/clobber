@@ -1,10 +1,10 @@
-import Point from "./Point";
-import State, { BotState, BulletState, WorldState } from "./State";
-import BotManager from "./BotManager";
-import { Action, Direction } from "./BotAction";
-import Bullet from "./Bullet";
-import { Circle, circlesOverlap } from "./Shapes";
-import GameRenderer from "./GameRenderer";
+import Point from './Point';
+import State, { BotState, BulletState, WorldState } from './State';
+import BotManager from './BotManager';
+import { Action, Direction } from './BotAction';
+import Bullet from './Bullet';
+import { Circle, circlesOverlap } from './Shapes';
+import GameRenderer from './GameRenderer';
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -48,7 +48,7 @@ class Game {
         do {
             numTries++;
             if (numTries > 1000) {
-                throw new Error("Failed to find a spot to place the bot.");
+                throw new Error('Failed to find a spot to place the bot.');
             }
             point = new Point(
                 getRandomInt(this.world.botRadius, this.canvas.width - this.world.botRadius),
@@ -132,7 +132,7 @@ class Game {
     }
 
     cloneString(str) {
-        return (" " + str).slice(1);
+        return (' ' + str).slice(1);
     }
 
     performBotActions() {
