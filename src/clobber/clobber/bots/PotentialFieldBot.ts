@@ -1,5 +1,6 @@
-import BotAction, { Action, Direction } from '../BotAction';
+import BotAction, {Action, Direction} from '../BotAction';
 import Point from '../Point';
+import State, {BotState, WorldState} from '../State';
 
 /*
 
@@ -13,27 +14,34 @@ const imageRainbowStar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQ
 
 class FieldObject {
     /**
-	 * @param point {Point} - The position of the object generating the field.
-	 * @param radius {Number} - The radius of the object generating the field. Can be a goal or obstacle.
-	 * @param spread {Number} - The radius around the field that applies varying strengths.
-	 * @param strength {Number} - The strength of the field. Stronger when closer for repulsive fields. Stronger when farther away for attractive
-	 * fields.
-	 * @param tangentialModifier {Number} - Should be + or - 90 degrees or Math.PI / 2.
-	 */
-    constructor(point, radius, spread, strength, tangentialModifier = 1) {
-        this.point = point;
-        this.radius = radius;
-        this.spread = spread;
-        this.strength = strength;
-        this.tangentialModifer = tangentialModifier;
+     * @param point {Point} - The position of the object generating the field.
+     * @param radius {Number} - The radius of the object generating the field. Can be a goal or obstacle.
+     * @param spread {Number} - The radius around the field that applies varying strengths.
+     * @param strength {Number} - The strength of the field. Stronger when closer for repulsive fields. Stronger when farther away for attractive
+     * fields.
+     * @param tangentialModifier {Number} - Should be + or - 90 degrees or Math.PI / 2.
+     */
+    constructor(
+        public point: Point,
+        public radius: number,
+        public spread: number,
+        public strength: number,
+        public tangentialModifier: number = 1
+    ) {
     }
 }
 
-class PotentialFieldBot {
-    constructor(id, team, world) {
-        this.id = id;
-        this.team = team;
-        this.world = world;
+export default class PotentialFieldBot {
+    private shotClock: number;
+    private history: Point[]
+    private historyClock: number;
+    private readonly historyInterval: number;
+    private readonly maxHistory: number;
+    private readonly image: HTMLImageElement;
+    private readonly shootImage: HTMLImageElement;
+    private shooting: boolean;
+
+    constructor(protected id: number, protected team: string, protected world: WorldState) {
         this.shotClock = 0;
 
         this.history = [];
@@ -52,16 +60,16 @@ class PotentialFieldBot {
         return this.id;
     }
 
-    takeTurn(state) {
+    takeTurn(state: State) {
         this.shotClock++;
         this.shooting = false;
 
         let action = Action.None;
-        let direction = null;
+        let direction: Direction;
 
         const closestEnemy = this.getClosestEnemy(state);
 
-        if (this.shotClock % this.world.shootFrequency === 0) {
+        if (this.shotClock % this.world.shootFrequency === 0 && closestEnemy) {
             // TODO: Do we want to shoot whenever we can? What if we need to move out of the way of a bullet with this one spare turn?
             this.shotClock = 0;
             action = Action.Shoot;
@@ -71,10 +79,9 @@ class PotentialFieldBot {
             return new BotAction(action, direction);
         }
 
-        let [deltaX, deltaY] = [
+
+        let fields = [
             // TODO: Experiment with field strength
-            // move toward the closest enemy
-            this.getAttractiveField(state, new FieldObject(closestEnemy.point, this.world.botRadius, 1, 1)),
             // avoid lethal objects
             ...this.getAvoidEnemyFields(state),
             ...this.getAvoidBulletFields(state),
@@ -82,13 +89,20 @@ class PotentialFieldBot {
             this.getAvoidWallField(state),
             // avoid cyclic behavior
             ...this.getPastBehaviorFields(state),
-        ].reduce((delta, current) => [delta[0] + current[0], delta[1] + current[1]]);
+        ]
+        // move toward the closest enemy
+        if (closestEnemy) {
+            fields.push(this.getAttractiveField(state, new FieldObject(closestEnemy.point, this.world.botRadius, 1, 1)))
+        }
+        let [deltaX, deltaY] = fields.reduce(
+            (delta: number[], current: number[]) => [delta[0] + current[0], delta[1] + current[1]]
+        );
 
         if (
             state.myBot.point.x < this.world.botRadius * 8
-			|| state.myBot.point.x > this.world.width - this.world.botRadius * 8
-			|| state.myBot.point.y < this.world.botRadius * 8
-			|| state.myBot.point.y > this.world.width - this.world.botRadius * 8
+            || state.myBot.point.x > this.world.width - this.world.botRadius * 8
+            || state.myBot.point.y < this.world.botRadius * 8
+            || state.myBot.point.y > this.world.width - this.world.botRadius * 8
         ) {
             // prefer the center
             const centerField = new FieldObject(new Point(this.world.width / 2, this.world.height / 2), 1, 10, 5, Math.PI / 2);
@@ -106,7 +120,7 @@ class PotentialFieldBot {
         return new BotAction(action, direction);
     }
 
-    updateHistory(state) {
+    updateHistory(state: State) {
         if (this.history.length >= this.maxHistory) {
             this.history.pop();
         }
@@ -118,11 +132,11 @@ class PotentialFieldBot {
         }
     }
 
-    addDelta(current, addition) {
+    addDelta(current: number[], addition: number[]): number[] {
         return [current[0] + addition[0], current[1] + addition[1]];
     }
 
-    getShootDirection(state, enemy) {
+    getShootDirection(state: State, enemy: BotState): Direction {
         // TODO: Is there a way we can combine this with the getDirection function?
         const deltaX = enemy.point.x - state.myBot.point.x;
         const deltaY = state.myBot.point.y - enemy.point.y;
@@ -152,10 +166,12 @@ class PotentialFieldBot {
         if (angle >= -67 && angle < -22) {
             return Direction.DownRight;
         }
+
+        return Direction.None;
     }
 
-    getDirection(deltaX, deltaY) {
-        let direction = null;
+    getDirection(deltaX: number, deltaY: number): Direction {
+        let direction = Direction.None;
 
         if (deltaY !== 0) {
             if (deltaY < 0) {
@@ -188,13 +204,13 @@ class PotentialFieldBot {
         return direction;
     }
 
-    getClosestEnemy(state) {
-        let closestBot = null;
+    getClosestEnemy(state: State): BotState | undefined {
+        let closestBot: BotState | undefined = undefined;
         let closestDistance = Number.MAX_VALUE;
 
         state.bots.forEach(bot => {
             if (this.team !== bot.team
-				&& state.myBot.point.distance(bot.point) <= closestDistance) {
+                && state.myBot.point.distance(bot.point) <= closestDistance) {
                 closestBot = bot;
                 closestDistance = state.myBot.point.distance(bot.point);
             }
@@ -203,7 +219,7 @@ class PotentialFieldBot {
         return closestBot;
     }
 
-    getAvoidEnemyFields(state) {
+    getAvoidEnemyFields(state: State): number[][] {
         return state.bots.map(bot => {
             const safeBulletDistance = 60; // TODO: calculate based on how fast I can get out of bullet speed range
             const spread = 2 * this.world.botRadius + safeBulletDistance;
@@ -211,7 +227,7 @@ class PotentialFieldBot {
         });
     }
 
-    getAvoidBulletFields(state) {
+    getAvoidBulletFields(state: State) {
         return state.bullets.map(bullet => {
             const safeBulletDistance = 40; // TODO: calculate based on how fast I can get out of bullet speed range
             const spread = 2 * this.world.bulletRadius + safeBulletDistance;
@@ -220,7 +236,7 @@ class PotentialFieldBot {
         });
     }
 
-    getAvoidWallField(state) {
+    getAvoidWallField(state: State) {
         // TODO: Calculate a Perpendicular Field
         const distanceFromWall = this.world.botRadius * 3;
         let deltaX = 0;
@@ -246,7 +262,7 @@ class PotentialFieldBot {
         ].reduce((delta, current) => [delta[0] + current[0], delta[1] + current[1]], [deltaX, deltaY]);
     }
 
-    getPastBehaviorFields(state) {
+    getPastBehaviorFields(state: State) {
         return this.history.map((point, index, history) => {
             const strength = (history.length - index) * (1 / this.maxHistory);
             const spread = this.world.bulletRadius;
@@ -255,13 +271,13 @@ class PotentialFieldBot {
         });
     }
 
-    getAttractiveField(state, field) {
+    getAttractiveField(state: State, field: FieldObject): number[] {
         // TODO: Explore tangential field
         const distance = state.myBot.point.distance(field.point);
-        const angle = Math.atan2((field.point.y - state.myBot.point.y), (field.point.x - state.myBot.point.x)) + field.tangentialModifer;
+        const angle = Math.atan2((field.point.y - state.myBot.point.y), (field.point.x - state.myBot.point.x)) + field.tangentialModifier;
 
-        let deltaX;
-        let deltaY;
+        let deltaX = 0;
+        let deltaY = 0;
 
         if (distance < field.radius) {
             deltaX = 0;
@@ -277,13 +293,13 @@ class PotentialFieldBot {
         return [deltaX, deltaY];
     }
 
-    getRepulsiveField(state, field) {
+    getRepulsiveField(state: State, field: FieldObject): number[] {
         // TODO: Explore tangential field
         const distance = state.myBot.point.distance(field.point);
-        const angle = Math.atan2((field.point.y - state.myBot.point.y), (field.point.x - state.myBot.point.x)) + field.tangentialModifer;
+        const angle = Math.atan2((field.point.y - state.myBot.point.y), (field.point.x - state.myBot.point.x)) + field.tangentialModifier;
 
-        let deltaX;
-        let deltaY;
+        let deltaX = 0;
+        let deltaY = 0;
 
         if (distance < field.radius) {
             deltaX = -Math.sign(Math.cos(angle)) * Number.MAX_VALUE;
@@ -299,7 +315,7 @@ class PotentialFieldBot {
         return [deltaX, deltaY];
     }
 
-    render(context, point) {
+    render(context: CanvasRenderingContext2D, point: Point) {
         // TODO: Add animations for moving in various directions and shooting
         if (this.shooting || this.shotClock < 10) {
             context.drawImage(this.shootImage,
@@ -323,5 +339,3 @@ class PotentialFieldBot {
         }, null, 4);
     }
 }
-
-export default PotentialFieldBot;

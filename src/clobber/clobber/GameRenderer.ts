@@ -1,23 +1,26 @@
 import Point from './Point';
+import {WorldState} from './State';
+import BotManager from './BotManager';
+import Bullet from './Bullet';
 
 export default class GameRenderer {
-    constructor(canvas, world) {
-        this.canvas = canvas;
-        this.context = canvas.getContext('2d');
-        this.world = world;
+    private readonly context: CanvasRenderingContext2D;
+
+    constructor(private canvas: HTMLCanvasElement, private world: WorldState) {
+        this.context = canvas.getContext('2d')!;
     }
 
     clearScreen() {
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    render(botManagers, bullets) {
+    render(botManagers: BotManager[], bullets: Bullet[]) {
         this.clearScreen();
         botManagers.forEach(bot => bot.render(this.context));
         bullets.forEach(bullet => bullet.render(this.context));
     }
 
-    renderFPS(fps) {
+    renderFPS(fps: number) {
         this.context.fillStyle = '#FF00FF';
         this.context.font = 'normal 12pt Arial';
         this.context.fillText(Math.round(fps) + ' fps', 4, 18);
@@ -25,7 +28,7 @@ export default class GameRenderer {
         this.context.fillStyle = '#000000';
     }
 
-    renderGameOver(botManagers, deadBots) {
+    renderGameOver(botManagers: BotManager[], deadBots: BotManager[]) {
         this.clearScreen();
         this.context.fillStyle = '#0000FF';
         this.context.font = 'normal 12pt Arial';
@@ -60,20 +63,20 @@ export default class GameRenderer {
 
                 colX += this.world.botRadius + 8;
                 this.context.fillStyle = '#FF0000';
-                const winnerId = bm.bot.getId();
+                const winnerId = bm.id;
                 this.context.fillText(winnerId, colX, y);
 
                 colX = x + 150;
                 this.context.fillStyle = '#FFFF00';
-                this.context.fillText(bm.score, colX, y);
+                this.context.fillText(String(bm.score), colX, y);
 
                 colX = x + 225;
                 this.context.fillStyle = '#FFFF00';
-                this.context.fillText(Object.keys(bm.kills).length, colX, y);
+                this.context.fillText(String(Object.keys(bm.kills).length), colX, y);
 
                 colX = x + 300;
                 this.context.fillStyle = '#FFFF00';
-                this.context.fillText(bm.dead ? 0 : 1, colX, y);
+                this.context.fillText(bm.dead ? '0' : '1', colX, y);
 
                 y += 20;
             });

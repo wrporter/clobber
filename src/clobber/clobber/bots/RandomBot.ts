@@ -1,31 +1,34 @@
 import * as images from './images';
 import BotAction, { Action, Direction } from '../BotAction';
+import {WorldState} from '../State';
+import Point from '../Point';
+import {Bot} from '../BotManager';
 const IMAGES = [images.bird, images.duck, images.fish, images.frog, images.owl];
 
-function getRandomImage() {
+function getRandomImage(): string {
     return IMAGES[Math.floor(Math.random() * IMAGES.length)];
 }
 
-function getRandomInt(max) {
+function getRandomInt(max: number): number {
     return Math.floor(Math.random() * Math.floor(max));
 }
 
-class RandomBot {
-    constructor(id, team, world) {
-        this.id = id;
-        this.team = team;
-        this.world = world;
+export default class RandomBot extends Bot {
+    private readonly image: HTMLImageElement;
+
+    constructor(protected id: string, protected team: string, protected world: WorldState) {
+        super(id, team, world);
         this.image = new Image();
         this.image.src = getRandomImage();
     }
 
-    getId() {
+    getId(): string {
         return this.id;
     }
 
-    takeTurn() {
-        let action = Action.None;
-        let direction = Direction.Up;
+    takeTurn(): BotAction {
+        let action: Action;
+        let direction: Direction;
 
         switch(getRandomInt(2))
         {
@@ -39,7 +42,7 @@ class RandomBot {
             action = Action.None;
         }
 
-        switch(getRandomInt(8))
+        switch(getRandomInt(7))
         {
         case 0:
             direction = Direction.Up;
@@ -63,24 +66,22 @@ class RandomBot {
             direction = Direction.DownRight;
             break;
         default:
-            direction = Direction.DownLeft;
+            direction = Direction.None;
         }
 
         return new BotAction(action, direction);
     }
 
-    render(context, point) {
+    render(context: CanvasRenderingContext2D, point: Point): void {
         // TODO: Don't allow bots to draw outside their allotted 16x16 space.
 
         context.drawImage(this.image, point.x - this.world.botRadius, point.y - this.world.botRadius, this.world.botRadius * 2, this.world.botRadius * 2);
     }
 
-    toString() {
+    toString(): string {
         return JSON.stringify({
             id: this.id,
             name: this.team
         }, null, 4);
     }
 }
-
-export default RandomBot;

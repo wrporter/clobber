@@ -1,15 +1,21 @@
-import BotAction, { Action, Direction } from '../BotAction';
+import BotAction, {Action, Direction} from '../BotAction';
+import State, {BotState, BulletState, WorldState} from '../State';
+import Point from '../Point';
+import {Bot} from '../BotManager';
 
 const eighthPi = Math.PI / 8;
 
 const mushroomPng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4wUSAiMdsN8cPgAAAEJ0RVh0Q29tbWVudABDUkVBVE9SOiBnZC1qcGVnIHYxLjAgKHVzaW5nIElKRyBKUEVHIHY2MiksIHF1YWxpdHkgPSAxMDAKu3x3owAAAMNJREFUOMulUzEOgzAM9IWO5QOVGPuA/I29YudveQBjJT4AK3KnK4lrQqveFMydc7HOEAeqql4dAGwtWCHFqW1kHTtZx05S23z8Jy72VpItWI/LJqqqdBNy8Tp2b8H9cXPP5FADfqS2KYg1TMMscdkEAGCts8k0zIXI1uOy7UO077Zir0ZNkD8RPJs1WA5UVfPpH1n2ml/7554DFojYH7vIL4RNFgOSh8Weixnk+fayXtuHgn+0QGfLFr7ZwhoHvzaw1l+S7oHlEqbYjAAAAABJRU5ErkJggg==';
 
-export class Mushroom {
+export class Mushroom extends Bot {
+    private frameCounter: number;
+    private win: boolean;
+    private readonly image: HTMLImageElement;
+    private readonly botBulletThresh: number;
+    private readonly botBotThresh: number;
 
-    constructor(id, team, world) {
-        this.id = id;
-        this.team = team;
-        this.world = world;
+    constructor(protected id: string, protected team: string, protected world: WorldState) {
+        super(id, team, world);
         this.frameCounter = 0;
 
         this.win = false;
@@ -21,14 +27,14 @@ export class Mushroom {
         this.botBotThresh = 2 * world.botRadius + 10;
     }
 
-    getId() {
+    getId(): string {
         return this.id;
     }
 
-    takeTurn(state) {
+    takeTurn(state: State): BotAction {
         this.frameCounter++;
-        let action;
-        let direction = 0;
+        let action: Action;
+        let direction: Direction;
 
         if (this.frameCounter % this.world.shootFrequency === 0) {
             action = Action.Shoot;
@@ -37,32 +43,33 @@ export class Mushroom {
             action = Action.Move;
             direction = this.getDodgeDirection(state);
 
-            if (direction === null) {
+            if (direction === Direction.None) {
                 const friendlyBot = this.getClosestFriendlyBot(state);
                 if (friendlyBot !== null) {
                     direction = this.getAvoidBotDirection(state.myBot.point, friendlyBot.point);
                 }
             }
 
-            if (direction === null) {
+            if (direction === Direction.None) {
                 const targetBot = this.getClosestEnemyBot(state);
                 if (targetBot === null) {
                     this.win = true;
+                } else {
+                    direction = this.getGoToBotDirection(state.myBot.point, targetBot.point);
                 }
-                direction = this.getGoToBotDirection(state.myBot.point, targetBot.point);
             }
         }
 
         return new BotAction(action, direction);
     }
 
-    getClosestFriendlyBot(state) {
+    getClosestFriendlyBot(state: State): BotState | null {
         let closestBot = null;
         let closestDistance = Number.MAX_VALUE;
         state.bots.forEach(bot => {
             if (this.team === bot.team
-				&& state.myBot.point.distance(bot.point) < 60
-				&& state.myBot.point.distance(bot.point) <= closestDistance) {
+                && state.myBot.point.distance(bot.point) < 60
+                && state.myBot.point.distance(bot.point) <= closestDistance) {
                 closestBot = bot;
                 closestDistance = state.myBot.point.distance(bot.point);
             }
@@ -70,12 +77,12 @@ export class Mushroom {
         return closestBot;
     }
 
-    getClosestEnemyBot(state) {
+    getClosestEnemyBot(state: State): BotState | null {
         let closestBot = null;
         let closestDistance = Number.MAX_VALUE;
         state.bots.forEach(bot => {
             if (this.team !== bot.team
-				&& state.myBot.point.distance(bot.point) <= closestDistance) {
+                && state.myBot.point.distance(bot.point) <= closestDistance) {
                 closestBot = bot;
                 closestDistance = state.myBot.point.distance(bot.point);
             }
@@ -83,9 +90,9 @@ export class Mushroom {
         return closestBot;
     }
 
-    getAvoidBotDirection(me, bot) {
-        if (bot == null) {
-            return null;
+    getAvoidBotDirection(me: Point, bot: Point): Direction {
+        if (!bot) {
+            return Direction.None;
         }
         let botDistance = this.botBotThresh;
 
@@ -112,12 +119,12 @@ export class Mushroom {
             return Direction.Right;
         }
 
-        return null;
+        return Direction.None;
     }
 
-    getGoToBotDirection(me, bot) {
-        if (bot == null) {
-            return null;
+    getGoToBotDirection(me: Point, bot: Point): Direction {
+        if (!bot) {
+            return Direction.None;
         }
         let botDistance = 50;
 
@@ -144,31 +151,31 @@ export class Mushroom {
             return Direction.Right;
         }
 
-        return null;
+        return Direction.None;
     }
 
-    getDodgeDirection(state) {
+    getDodgeDirection(state: State): Direction {
         let closestBullet = null;
         let closestDistance = Number.MAX_VALUE;
         let bulletDistance = 50;
 
-        state.bullets.forEach(bullet => {
+        state.bullets.forEach((bullet: BulletState) => {
             if (state.myBot.point.distance(bullet.point) < bulletDistance
-				&& state.myBot.point.distance(bullet.point) <= closestDistance
-				&& this.bulletWillHit(state.myBot.point, bullet.point)) {
+                && state.myBot.point.distance(bullet.point) <= closestDistance
+                && this.bulletWillHit(state.myBot.point, bullet)) {
                 closestBullet = bullet;
                 closestDistance = state.myBot.point.distance(bullet.point);
             }
         });
 
         if (closestBullet === null) {
-            return null;
+            return Direction.None;
         } else {
-            return this.getAvoidBulletDirection(state.myBot.point, closestBullet.point);
+            return this.getAvoidBulletDirection(state.myBot.point, closestBullet);
         }
     }
 
-    getXPlus(bullet) {
+    getXPlus(bullet: BulletState): number {
         if (bullet.direction === Direction.Left) {
             return -this.world.bulletStepDistance;
         } else {
@@ -176,7 +183,7 @@ export class Mushroom {
         }
     }
 
-    getYPlus(bullet) {
+    getYPlus(bullet: BulletState): number {
         if (bullet.direction === Direction.Up) {
             return -this.world.bulletStepDistance;
         } else {
@@ -184,35 +191,35 @@ export class Mushroom {
         }
     }
 
-    bulletWillHit(me, bullet) {
-        if ((this.getXPlus(bullet) > 0 && bullet.x < me.x)
-			|| (this.getXPlus(bullet) < 0 && bullet.x > me.x)
-			|| (this.getYPlus(bullet) < 0 && bullet.y > me.y)
-			|| (this.getYPlus(bullet) > 0 && bullet.y < me.y)) {
+    bulletWillHit(me: Point, bullet: BulletState) {
+        if ((this.getXPlus(bullet) > 0 && bullet.point.x > me.x)
+            || (this.getXPlus(bullet) < 0 && bullet.point.x < me.x)
+            || (this.getYPlus(bullet) < 0 && bullet.point.y < me.y)
+            || (this.getYPlus(bullet) > 0 && bullet.point.y > me.y)) {
 
-            if (me.distance(bullet) < this.botBulletThresh * this.world.bulletStepDistance * ((this.getXPlus(bullet) !== 0)
-			&& (this.getYPlus(bullet) !== 0) ? 2 : 1)) {
+            if (me.distance(bullet.point) < this.botBulletThresh * this.world.bulletStepDistance * ((this.getXPlus(bullet) !== 0)
+            && (this.getYPlus(bullet) !== 0) ? 2 : 1)) {
                 return true;
             }
         }
         return false;
     }
 
-    getAvoidBulletDirection(me, bullet) {
-        let direction = null;
+    getAvoidBulletDirection(me: Point, bullet: BulletState): Direction {
+        let direction = Direction.None;
         if (this.getXPlus(bullet) !== 0 && this.getYPlus(bullet) !== 0) {
-            let c = ((me.x - bullet.x) * this.getXPlus(bullet) + (me.y - bullet.y) * this.getYPlus(bullet)) / (Math.pow(this.getXPlus(bullet), 2) + Math.pow(this.getYPlus(bullet), 2));
-            let distance = Math.sqrt(Math.pow((me.x - bullet.x - c * this.getXPlus(bullet)), 2) + Math.pow((me.y - bullet.y - c * this.getYPlus(bullet)), 2));
+            let c = ((me.x - bullet.point.x) * this.getXPlus(bullet) + (me.y - bullet.point.y) * this.getYPlus(bullet)) / (Math.pow(this.getXPlus(bullet), 2) + Math.pow(this.getYPlus(bullet), 2));
+            let distance = Math.sqrt(Math.pow((me.x - bullet.point.x - c * this.getXPlus(bullet)), 2) + Math.pow((me.y - bullet.point.y - c * this.getYPlus(bullet)), 2));
             // bullet is going in this direction: \
             if (this.getXPlus(bullet) * this.getYPlus(bullet) > 0 && Math.ceil(Math.abs(distance)) <= this.botBulletThresh) {
-                if (me.y - me.x - bullet.y + bullet.x >= 0) {
+                if (me.y - me.x - bullet.point.y + bullet.point.x >= 0) {
                     direction = Direction.DownLeft;
                 } else {
                     direction = Direction.UpRight;
                 }
             } // bullet is going in this direction: /
             else if (this.getXPlus(bullet) * this.getYPlus(bullet) <= 0 && Math.ceil(Math.abs(distance)) <= this.botBulletThresh) {
-                if (me.y + me.x - bullet.y - bullet.x > 0) {
+                if (me.y + me.x - bullet.point.y - bullet.point.x > 0) {
                     direction = Direction.DownRight;
                 } else {
                     direction = Direction.UpLeft;
@@ -220,14 +227,14 @@ export class Mushroom {
             }
         } else {
             if (this.shouldMoveVertical(me, bullet)) {
-                if (me.y < bullet.y) {
+                if (me.y < bullet.point.y) {
                     direction = Direction.Up;
                 } else {
                     direction = Direction.Down;
                 }
             }
             if (this.shouldMoveHorizontal(me, bullet)) {
-                if (me.x < bullet.x) {
+                if (me.x < bullet.point.x) {
                     if (direction === Direction.Up) {
                         direction = Direction.UpLeft;
                     } else if (direction === Direction.Down) {
@@ -249,42 +256,41 @@ export class Mushroom {
         return direction;
     }
 
-    shouldMoveVertical(me, bullet) {
-        let thresh = Math.abs(Math.abs(me.y - bullet.y) - this.botBulletThresh);
-        return ((this.getXPlus(bullet) > 0 && bullet.x < me.x)
-			|| (this.getXPlus(bullet) < 0 && bullet.x > me.x))
-			&& (thresh <= this.botBulletThresh && thresh > 0);
+    shouldMoveVertical(me: Point, bullet: BulletState): boolean {
+        let thresh = Math.abs(Math.abs(me.y - bullet.point.y) - this.botBulletThresh);
+        return ((this.getXPlus(bullet) > 0 && bullet.point.x < me.x)
+            || (this.getXPlus(bullet) < 0 && bullet.point.x > me.x))
+            && (thresh <= this.botBulletThresh && thresh > 0);
     }
 
-    shouldMoveHorizontal(me, bullet) {
-        let thresh = Math.abs(Math.abs(me.x - bullet.x) - this.botBulletThresh);
-        return ((this.getYPlus(bullet) < 0 && bullet.y > me.y)
-			|| (this.getYPlus(bullet) > 0 && bullet.y < me.y))
-			&& (thresh <= this.botBulletThresh && thresh > 0);
+    shouldMoveHorizontal(me: Point, bullet: BulletState): boolean {
+        let thresh = Math.abs(Math.abs(me.x - bullet.point.x) - this.botBulletThresh);
+        return ((this.getYPlus(bullet) < 0 && bullet.point.y > me.y)
+            || (this.getYPlus(bullet) > 0 && bullet.point.y < me.y))
+            && (thresh <= this.botBulletThresh && thresh > 0);
     }
 
-    getShootDirection(state) {
-        let closestBot = null;
+    getShootDirection(state: State): Direction {
+        let closestBot: BotState | undefined;
         let closestDistance = Number.MAX_VALUE;
         state.bots.forEach(bot => {
             if (this.team !== bot.team
-				&& state.myBot.point.distance(bot.point) < closestDistance) {
+                && state.myBot.point.distance(bot.point) < closestDistance) {
                 closestBot = bot;
                 closestDistance = state.myBot.point.distance(bot.point);
             }
         });
 
-        if (closestBot == null) {
-            return null;
-        } else {
+        if (closestBot) {
             return this.shootTargetDirection(state.myBot.point, closestBot.point);
         }
+        return Direction.None;
     }
 
-    shootTargetDirection(me, target) {
-        let directionX = 0;
-        let directionY = 0;
-        let direction = null;
+    shootTargetDirection(me: Point, target: Point): Direction {
+        let directionX = Direction.None;
+        let directionY = Direction.None;
+        let direction = Direction.None;
         let deltaX = target.x - me.x;
         let deltaY = target.y - me.y;
 
@@ -326,7 +332,7 @@ export class Mushroom {
         return direction;
     }
 
-    render(context, point) {
+    render(context: CanvasRenderingContext2D, point: Point): void {
         context.drawImage(this.image,
             point.x - this.world.botRadius,
             point.y - this.world.botRadius,

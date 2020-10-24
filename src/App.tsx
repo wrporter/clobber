@@ -10,21 +10,26 @@ import {Mushroom} from './clobber/clobber/bots/Mushroom';
 import PotentialFieldBot from './clobber/clobber/bots/PotentialFieldBot';
 import HumanBot from './clobber/clobber/bots/HumanBot';
 
-function addBots(game) {
-    game.addBotToGame(new HumanBot(generateId(), 'human', game.world.clone()));
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world.clone()));
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world.clone()));
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world.clone()));
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world.clone()));
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world.clone()));
-    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
-    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
-    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world.clone()));
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world.clone()));
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world.clone()));
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world.clone()));
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world.clone()));
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world.clone()));
+function addBots(game: Game) {
+    game.addBotToGame(new HumanBot(generateId(), 'human', game.world), 'human');
+    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
+    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
+    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
+    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
+    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
+    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world), generateId());
+    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world), generateId());
+    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world), generateId());
+    // @ts-ignore
+    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
+    // @ts-ignore
+    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
+    // @ts-ignore
+    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
+    // @ts-ignore
+    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
+    // @ts-ignore
+    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
 }
 
 function App() {
@@ -41,8 +46,10 @@ function App() {
     }, [])
 
     function handleNewGame() {
-        gameRef.current = new Game(canvasRef.current);
-        addBots(gameRef.current);
+        if (canvasRef.current) {
+            gameRef.current = new Game(canvasRef.current);
+            addBots(gameRef.current);
+        }
     }
 
     function handleAddBot() {

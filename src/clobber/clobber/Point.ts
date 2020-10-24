@@ -1,10 +1,13 @@
-class Point {
-    constructor(x, y) {
+export default class Point {
+    public x: number;
+    public y: number
+
+    constructor(x: number, y: number) {
         this.x = x;
         this.y = y;
     }
 
-    distance(point) {
+    distance(point: Point) {
         return Math.hypot(point.x - this.x, point.y - this.y);
     }
 
@@ -16,5 +19,3 @@ class Point {
         return `(${this.x}, ${this.y})`;
     }
 }
-
-export default Point;

@@ -1,21 +1,17 @@
 import BotAction, { Action, Direction } from '../BotAction';
+import {Bot} from '../BotManager';
+import Point from '../Point';
 
-class DoNothingBot {
-    constructor(id, team, world) {
-        this.id = id;
-        this.team = team;
-        this.world = world;
-    }
-
-    getId() {
+export default class DoNothingBot extends Bot {
+    getId(): string {
         return this.id;
     }
 
-    takeTurn() {
+    takeTurn(): BotAction {
         return new BotAction(Action.None, Direction.Up);
     }
 
-    render(context, point) {
+    render(context: CanvasRenderingContext2D, point: Point): void {
         context.fillStyle = '#FFFFFF';
         context.beginPath();
         context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
@@ -23,12 +19,10 @@ class DoNothingBot {
         context.fillStyle = '#000000';
     }
 
-    toString() {
+    toString(): string {
         return JSON.stringify({
             id: this.id,
             name: this.team
         }, null, 4);
     }
 }
-
-export default DoNothingBot;
