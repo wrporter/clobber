@@ -1,4 +1,4 @@
-import BotAction, { Action, Direction } from '../BotAction';
+import BotAction, {Action, Direction} from '../BotAction';
 import {Bot} from '../BotManager';
 import Point from '../Point';
 
@@ -22,7 +22,10 @@ export default class DoNothingBot extends Bot {
     toString(): string {
         return JSON.stringify({
             id: this.id,
-            name: this.team
         }, null, 4);
+    }
+
+    getTeamName(): string {
+        return 'DoNothingBot';
     }
 }

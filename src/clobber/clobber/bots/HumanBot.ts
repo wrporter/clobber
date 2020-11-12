@@ -14,8 +14,8 @@ export default class HumanBot extends Bot {
     private shotClock: number;
     private readonly keys: { [key: string]: boolean };
 
-    constructor(protected id: string, protected team: string, protected world: WorldState) {
-        super(id, team, world);
+    constructor(protected world: WorldState) {
+        super(world);
         this.shotClock = 0;
         this.keys = {};
 
@@ -110,10 +110,13 @@ export default class HumanBot extends Bot {
         context.fillStyle = '#000000';
     }
 
+    public getTeamName(): string {
+        return 'HumanBot';
+    }
+
     toString(): string {
         return JSON.stringify({
             id: this.id,
-            name: this.team
         }, null, 4);
     }
 }

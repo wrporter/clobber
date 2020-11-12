@@ -9,45 +9,43 @@ import RandomBot from './clobber/clobber/bots/RandomBot';
 import {Mushroom} from './clobber/clobber/bots/Mushroom';
 import PotentialFieldBot from './clobber/clobber/bots/PotentialFieldBot';
 import HumanBot from './clobber/clobber/bots/HumanBot';
+import GuiGameRenderer from './clobber/clobber/GameRenderer/GuiGameRenderer';
 
 function addBots(game: Game) {
-    game.addBotToGame(new HumanBot(generateId(), 'human', game.world), 'human');
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
-    game.addBotToGame(new Mushroom(generateId(), 'mushroom', game.world), 'mushroom');
-    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world), generateId());
-    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world), generateId());
-    game.addBotToGame(new RandomBot(generateId(), generateId(), game.world), generateId());
-    // @ts-ignore
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
-    // @ts-ignore
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
-    // @ts-ignore
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
-    // @ts-ignore
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
-    // @ts-ignore
-    game.addBotToGame(new PotentialFieldBot(generateId(), 'star', game.world), 'star');
+    game.addBotToGame(new HumanBot(game.world));
+    game.addBotToGame(new Mushroom(game.world));
+    game.addBotToGame(new Mushroom(game.world));
+    game.addBotToGame(new Mushroom(game.world));
+    game.addBotToGame(new Mushroom(game.world));
+    game.addBotToGame(new Mushroom(game.world));
+    game.addBotToGame(new RandomBot(game.world));
+    game.addBotToGame(new RandomBot(game.world));
+    game.addBotToGame(new RandomBot(game.world));
+    game.addBotToGame(new PotentialFieldBot(game.world));
+    game.addBotToGame(new PotentialFieldBot(game.world));
+    game.addBotToGame(new PotentialFieldBot(game.world));
+    game.addBotToGame(new PotentialFieldBot(game.world));
+    game.addBotToGame(new PotentialFieldBot(game.world));
 }
 
 function App() {
-    const canvasRef = React.useRef<HTMLCanvasElement>(null);
+    const gameRootRef = React.useRef<HTMLDivElement>(null);
     const botCodeRef = React.useRef<HTMLElement>(null);
-    const gameRef = React.useRef<any>();
+    const gameRef = React.useRef<Game>(new Game());
 
     React.useEffect(() => {
-        if (canvasRef.current) {
-            gameRef.current = new Game(canvasRef.current);
+        if (gameRootRef.current) {
+            gameRef.current = new Game();
+            gameRef.current.setRenderer(new GuiGameRenderer(gameRootRef.current, gameRef.current.world))
             addBots(gameRef.current);
             gameRef.current.start();
         }
     }, [])
 
     function handleNewGame() {
-        if (canvasRef.current) {
-            gameRef.current = new Game(canvasRef.current);
+        if (gameRootRef.current) {
+            gameRef.current = new Game();
+            gameRef.current.setRenderer(new GuiGameRenderer(gameRootRef.current, gameRef.current.world))
             addBots(gameRef.current);
         }
     }
@@ -61,23 +59,18 @@ function App() {
 
     function handleStartGame() {
         for (let i = 0; i < 10; i++) {
-            gameRef.current.addBotToGame(new RandomBot(generateId(), generateId(), gameRef.current.world.clone()));
+            gameRef.current.addBotToGame(new RandomBot(gameRef.current.world.clone()));
         }
         for (let i = 0; i < 3; i++) {
-            gameRef.current.addBotToGame(new Mushroom(generateId(), 'mushroom', gameRef.current.world.clone()));
+            gameRef.current.addBotToGame(new Mushroom(gameRef.current.world.clone()));
         }
         gameRef.current.start();
-    }
-
-    function handleEndGame() {
-        gameRef.current.gameOver = true;
     }
 
     return (
         <div className="App">
             <h1>Clobber Bots</h1>
-
-            <canvas className={styles.game} ref={canvasRef} width="400" height="400"/>
+            <div ref={gameRootRef} />
 
             <h2>Human Bot</h2>
             <p>Take the challenge and contest as the human-controlled bot, currently represented as a yellow circle.</p>
@@ -91,7 +84,6 @@ function App() {
             <button type="button" onClick={handleNewGame}>New Game</button>
             <button type="button" onClick={handleAddBot}>Add Bot</button>
             <button type="button" onClick={handleStartGame}>Start Game</button>
-            <button type="button" onClick={handleEndGame}>End Game</button>
 
             <ol>
                 <li>Click New Game to setup a new game. You want to do this if you want to test modifications to your

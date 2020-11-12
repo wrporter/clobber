@@ -1,8 +1,9 @@
 import * as images from './images';
-import BotAction, { Action, Direction } from '../BotAction';
+import BotAction, {Action, Direction} from '../BotAction';
 import {WorldState} from '../State';
 import Point from '../Point';
 import {Bot} from '../BotManager';
+
 const IMAGES = [images.bird, images.duck, images.fish, images.frog, images.owl];
 
 function getRandomImage(): string {
@@ -16,8 +17,8 @@ function getRandomInt(max: number): number {
 export default class RandomBot extends Bot {
     private readonly image: HTMLImageElement;
 
-    constructor(protected id: string, protected team: string, protected world: WorldState) {
-        super(id, team, world);
+    constructor(protected world: WorldState) {
+        super(world);
         this.image = new Image();
         this.image.src = getRandomImage();
     }
@@ -78,10 +79,13 @@ export default class RandomBot extends Bot {
         context.drawImage(this.image, point.x - this.world.botRadius, point.y - this.world.botRadius, this.world.botRadius * 2, this.world.botRadius * 2);
     }
 
+    public getTeamName(): string {
+        return 'RandomBot';
+    }
+
     toString(): string {
         return JSON.stringify({
             id: this.id,
-            name: this.team
         }, null, 4);
     }
 }

@@ -4,21 +4,46 @@ import State, {WorldState} from './State';
 import {generateId} from './ID';
 
 export abstract class Bot {
-    constructor(protected id: string, protected team: string, protected world: WorldState) {
+    protected id: string;
+    protected teammates: Set<string>;
+
+    constructor(protected world: WorldState) {
+        this.id = '';
+        this.teammates = new Set();
+    }
+
+    public setId(id: string): void {
+        this.id = id;
+    }
+
+    public getId(): string {
+        return this.id;
+    }
+
+    public registerTeammate(id: string): void {
+        this.teammates.add(id);
     }
 
     public abstract takeTurn(state: State): BotAction;
 
-    public abstract render(context: CanvasRenderingContext2D, point: Point): void;
-
-    public toString(): string {
-        return this.id;
+    /**
+     *
+     * @param context
+     * @param point
+     */
+    public render(context: CanvasRenderingContext2D, point: Point): void {
+        context.fillStyle = '#FF0000';
+        context.beginPath();
+        context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
+        context.fill();
+        context.fillStyle = '#000000';
     }
+
+    public abstract getTeamName(): string;
 }
 
 class BotManager {
     public id: string;
-    public team: string;
     public bot: Bot;
     public point: Point;
     public kills: { [key: string]: boolean };
@@ -27,11 +52,10 @@ class BotManager {
     public shotClock: number;
     public score: number;
 
-    constructor(bot: Bot, team: string, point: Point) {
+    constructor(bot: Bot, point: Point) {
         this.id = generateId();
         this.currentAction = new BotAction(Action.None, Direction.None)
         this.bot = bot;
-        this.team = team;
         this.point = point;
         this.kills = {};
         this.dead = false;

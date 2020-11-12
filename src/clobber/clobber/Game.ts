@@ -4,7 +4,8 @@ import BotManager, {Bot} from './BotManager';
 import {Action, Direction} from './BotAction';
 import Bullet from './Bullet';
 import {Circle, circlesOverlap} from './Shapes';
-import GameRenderer from './GameRenderer';
+import GameRenderer from './GameRenderer/GameRenderer';
+import ConsoleGameRenderer from './GameRenderer/ConsoleGameRenderer';
 
 function getRandomInt(min: number, max: number): number {
     min = Math.ceil(min);
@@ -25,11 +26,9 @@ export default class Game {
 
     private renderer: GameRenderer;
 
-    constructor(private canvas: HTMLCanvasElement) {
+    constructor() {
         this.world = new WorldState();
-
-        this.canvas.width = this.world.width;
-        this.canvas.height = this.world.height;
+        this.renderer = new ConsoleGameRenderer();
 
         this.botManagers = [];
         this.deadBots = [];
@@ -39,8 +38,10 @@ export default class Game {
 
         this.fps = 0;
         this.fpsTimes = [];
+    }
 
-        this.renderer = new GameRenderer(this.canvas, this.world);
+    public setRenderer(renderer: GameRenderer) {
+        this.renderer = renderer;
     }
 
     public start(): void {
@@ -55,7 +56,7 @@ export default class Game {
         );
     }
 
-    public addBotToGame(bot: Bot, team: string): void {
+    public addBotToGame(bot: Bot): void {
         let numTries = 0;
         let minDistance = 0;
         let point;
@@ -65,17 +66,17 @@ export default class Game {
                 throw new Error('Failed to find a spot to place the bot.');
             }
             point = new Point(
-                getRandomInt(this.world.botRadius, this.canvas.width - this.world.botRadius),
-                getRandomInt(this.world.botRadius, this.canvas.height - this.world.botRadius));
+                getRandomInt(this.world.botRadius, this.world.width - this.world.botRadius),
+                getRandomInt(this.world.botRadius, this.world.height - this.world.botRadius));
             minDistance = this.getMinDistanceToBot(point);
         } while (minDistance < this.world.minStartDistance);
-        const botManager = new BotManager(bot, team, point);
+        const botManager = new BotManager(bot, point);
         this.botManagers.push(botManager);
     }
 
     private gameLoop(): void {
         if (this.gameOver) {
-            this.renderer.renderGameOver(this.botManagers, this.deadBots);
+            this.renderer.renderGameOver(this.compileResults());
         } else {
             this.collectBotActions();
             this.performBotActions();
@@ -87,7 +88,7 @@ export default class Game {
             this.handleCollisions();
             this.checkGameOver();
 
-            requestAnimationFrame(() => {
+            this.renderer.gameLoop(() => {
                 const now = performance.now();
                 while (this.fpsTimes.length > 0 && this.fpsTimes[0] <= now - 1000) {
                     this.fpsTimes.shift();
@@ -102,7 +103,7 @@ export default class Game {
 
     private checkGameOver() {
         const oneTeamStanding = this.botManagers.every(
-            (bm, i, managers) => bm.team === managers[0].team
+            (bm, i, managers) => bm.bot.getTeamName() === managers[0].bot.getTeamName()
         );
 
         if (oneTeamStanding) {
@@ -128,14 +129,14 @@ export default class Game {
     private generateState(botManager: BotManager): State {
         const myBot = new BotState(
             Game.cloneString(botManager.id),
-            Game.cloneString(botManager.team),
+            Game.cloneString(botManager.bot.getTeamName()),
             botManager.point.clone());
 
         const bots = this.botManagers
             .filter(bm => bm.id !== botManager.id)
             .map(bm => new BotState(
                 Game.cloneString(bm.id),
-                Game.cloneString(bm.team),
+                Game.cloneString(bm.bot.getTeamName()),
                 bm.point.clone()));
 
         const myBullets = this.bullets
@@ -299,5 +300,16 @@ export default class Game {
         const botCircle2 = new Circle(this.world.botRadius, bot2.point.x, bot2.point.y);
         return bot1 !== bot2
             && circlesOverlap(botCircle1, botCircle2);
+    }
+
+    private compileResults(): BotManager[] {
+        return this.botManagers.concat(this.deadBots)
+            .map(bm => {
+                bm.score = Object.keys(bm.kills).length * this.world.killPoints
+                    + (!bm.dead ? this.world.survivePoints : 0);
+                return bm;
+            }).sort((bm1, bm2) => {
+            return bm2.score - bm1.score;
+        });
     }
 }

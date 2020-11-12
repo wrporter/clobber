@@ -1,6 +1,7 @@
 import BotAction, {Action, Direction} from '../BotAction';
 import Point from '../Point';
 import State, {BotState, WorldState} from '../State';
+import {Bot} from '../BotManager';
 
 /*
 
@@ -31,7 +32,7 @@ class FieldObject {
     }
 }
 
-export default class PotentialFieldBot {
+export default class PotentialFieldBot extends Bot {
     private shotClock: number;
     private history: Point[]
     private historyClock: number;
@@ -41,7 +42,8 @@ export default class PotentialFieldBot {
     private readonly shootImage: HTMLImageElement;
     private shooting: boolean;
 
-    constructor(protected id: number, protected team: string, protected world: WorldState) {
+    constructor(protected world: WorldState) {
+        super(world);
         this.shotClock = 0;
 
         this.history = [];
@@ -209,7 +211,7 @@ export default class PotentialFieldBot {
         let closestDistance = Number.MAX_VALUE;
 
         state.bots.forEach(bot => {
-            if (this.team !== bot.team
+            if (this.getTeamName() !== bot.team
                 && state.myBot.point.distance(bot.point) <= closestDistance) {
                 closestBot = bot;
                 closestDistance = state.myBot.point.distance(bot.point);
@@ -332,10 +334,13 @@ export default class PotentialFieldBot {
         }
     }
 
+    public getTeamName(): string {
+        return 'PotentialFieldBot';
+    }
+
     toString() {
         return JSON.stringify({
             id: this.id,
-            name: this.team
         }, null, 4);
     }
 }

@@ -14,8 +14,8 @@ export class Mushroom extends Bot {
     private readonly botBulletThresh: number;
     private readonly botBotThresh: number;
 
-    constructor(protected id: string, protected team: string, protected world: WorldState) {
-        super(id, team, world);
+    constructor(protected world: WorldState) {
+        super(world);
         this.frameCounter = 0;
 
         this.win = false;
@@ -67,7 +67,7 @@ export class Mushroom extends Bot {
         let closestBot = null;
         let closestDistance = Number.MAX_VALUE;
         state.bots.forEach(bot => {
-            if (this.team === bot.team
+            if (this.getTeamName() === bot.team
                 && state.myBot.point.distance(bot.point) < 60
                 && state.myBot.point.distance(bot.point) <= closestDistance) {
                 closestBot = bot;
@@ -81,7 +81,7 @@ export class Mushroom extends Bot {
         let closestBot = null;
         let closestDistance = Number.MAX_VALUE;
         state.bots.forEach(bot => {
-            if (this.team !== bot.team
+            if (this.getTeamName() !== bot.team
                 && state.myBot.point.distance(bot.point) <= closestDistance) {
                 closestBot = bot;
                 closestDistance = state.myBot.point.distance(bot.point);
@@ -274,7 +274,7 @@ export class Mushroom extends Bot {
         let closestBot: BotState | undefined;
         let closestDistance = Number.MAX_VALUE;
         state.bots.forEach(bot => {
-            if (this.team !== bot.team
+            if (this.getTeamName() !== bot.team
                 && state.myBot.point.distance(bot.point) < closestDistance) {
                 closestBot = bot;
                 closestDistance = state.myBot.point.distance(bot.point);
@@ -344,5 +344,9 @@ export class Mushroom extends Bot {
         // context.arc(point.x, point.y, this.world.botRadius, 0, 2 * Math.PI);
         // context.fill();
         // context.fillStyle = "#000";
+    }
+
+    getTeamName(): string {
+        return 'Mushroom';
     }
 }
