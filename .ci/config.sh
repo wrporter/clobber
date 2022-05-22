@@ -2,9 +2,12 @@
 
 APP_NAME="clobber"
 
-BASE_DIRECTORY="/volume1/docker/"
 SSH_USER="wesp"
 SSH_HOST="roshar"
+SSH_PORT="2614"
+SSH_PORT_OPT="-p ${SSH_PORT}"
+SCP_PORT="-P ${SSH_PORT}"
+BASE_DIRECTORY="/volume1/docker/"
 DOCKER_REGISTRY="192.168.1.222:5555"
 
 DOCKER_REGISTRY_URL="${DOCKER_REGISTRY:-}"
@@ -14,6 +17,7 @@ TARGET_IMAGE="${DOCKER_REGISTRY_URL}/${IMAGE_PATH}"
 VERSION="${GIT_COMMIT:-$(git rev-parse HEAD)}"
 
 BUILD_ID=${BUILD_ID:="FAKE_ID_123"}
+CURRENT_TIMESTAMP=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
 
 GIT_REPO_URL="${GIT_URL:-$(git remote get-url origin)}"
 GIT_COMMIT=${GIT_COMMIT:-$(git rev-parse HEAD)}

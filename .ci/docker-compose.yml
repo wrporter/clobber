@@ -1,0 +1,15 @@
+version: '3.8'
+
+networks:
+  reverse-proxy_internal:
+    external: true
+
+services:
+  clobber:
+    container_name: clobber
+    image: 192.168.1.222:5555/clobber
+    restart: unless-stopped
+    ports:
+      - 2015:2015
+    networks:
+      - reverse-proxy_internal
